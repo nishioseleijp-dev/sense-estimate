@@ -1,0 +1,16 @@
+# スクレイピング関連
+__pycache__/
+*.py
+*.csv
+*.xlsx
+*.log
+*.txt
+booking_progress.json
+current_sheet.csv
+
+# Claude設定（画像以外）
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db
