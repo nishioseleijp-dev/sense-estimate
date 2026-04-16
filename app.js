@@ -1535,18 +1535,28 @@ function renderEstimateMera() {
 // ============================================================
 
 // 選択後に自動で次ステップへ進むヘルパー（150ms後に進む）
-function advanceAfterSelect() {
-  render();
+function advanceAfterSelect(el) {
+  // フルレンダリングせずDOM直接操作で選択ハイライト
+  if (el) {
+    const grid = el.closest('.card-grid, .card-series-overlay-wrap');
+    const scope = grid || document;
+    scope.querySelectorAll('.selected').forEach(e => e.classList.remove('selected'));
+    el.classList.add('selected');
+  }
   setTimeout(() => {
     state.error = '';
     if (validateStep()) { state.stepIndex++; render(); }
-  }, 150);
+  }, 120);
 }
+
+let _prevStepId = null;
 
 function render() {
   const app    = document.getElementById('app');
   const stepId = currentStepId();
   const steps  = currentSteps();
+  const isStepChange = stepId !== _prevStepId;
+  _prevStepId = stepId;
 
   const progressBar = stepId !== 'home' ? renderProgressBar(steps, state.stepIndex) : '';
 
@@ -1595,7 +1605,7 @@ function render() {
       <img class="header-logo-img" src="images/sense_logo.jpg.png.png?v=3" alt="SENSE Product Company" onerror="this.src='images/sense_logo.jpg.png?v=3';this.onerror=function(){this.style.display='none';}">
     </div>
     ${progressBar}
-    <div class="container">
+    <div class="${isStepChange ? 'container container-entering' : 'container'}">
       ${errorHtml}
       ${content}
     </div>`;
@@ -1658,7 +1668,7 @@ function attachEvents() {
         state.jac.bubble = false;
         state.jac.led    = false;
       }
-      advanceAfterSelect();
+      advanceAfterSelect(el);
     }));
   }
 
@@ -1671,14 +1681,14 @@ function attachEvents() {
         state.jac.faucetType = null;
         state.jac.faucetIdx  = null;
       }
-      advanceAfterSelect();
+      advanceAfterSelect(el);
     }));
   }
 
   if (stepId === 'jac_size') {
     document.querySelectorAll('[data-idx]').forEach(el => el.addEventListener('click', () => {
       state.jac.sizeIdx = parseInt(el.dataset.idx);
-      advanceAfterSelect();
+      advanceAfterSelect(el);
     }));
   }
 
@@ -1693,7 +1703,7 @@ function attachEvents() {
     }));
     document.querySelectorAll('[data-faucet-idx]').forEach(el => el.addEventListener('click', () => {
       state.jac.faucetIdx = parseInt(el.dataset.faucetIdx);
-      advanceAfterSelect();
+      advanceAfterSelect(el);
     }));
   }
 
@@ -1752,7 +1762,7 @@ function attachEvents() {
   if (stepId === 'sau_mat') {
     document.querySelectorAll('[data-idx]').forEach(el => el.addEventListener('click', () => {
       state.sau.material = parseInt(el.dataset.idx);
-      advanceAfterSelect();
+      advanceAfterSelect(el);
     }));
   }
 
@@ -1841,7 +1851,7 @@ function attachEvents() {
   if (stepId === 'sau_stove') {
     document.querySelectorAll('[data-stove]').forEach(el => el.addEventListener('click', () => {
       state.sau.stoveIdx = el.dataset.stove === 'none' ? null : parseInt(el.dataset.stove);
-      advanceAfterSelect();
+      advanceAfterSelect(el);
     }));
   }
 
@@ -1869,14 +1879,14 @@ function attachEvents() {
         state.logs.sizeIdx   = idx;
         state.logs.barrelIdx = null;
       }
-      advanceAfterSelect();
+      advanceAfterSelect(el);
     }));
   }
 
   if (stepId === 'logs_material') {
     document.querySelectorAll('[data-barrel-idx]').forEach(el => el.addEventListener('click', () => {
       state.logs.barrelIdx = parseInt(el.dataset.barrelIdx);
-      advanceAfterSelect();
+      advanceAfterSelect(el);
     }));
   }
 
@@ -1884,7 +1894,7 @@ function attachEvents() {
     document.querySelectorAll('[data-logs-front]').forEach(el => el.addEventListener('click', () => {
       const v = el.dataset.logsFront;
       state.logs.frontIdx = v === 'none' ? null : parseInt(v);
-      advanceAfterSelect();
+      advanceAfterSelect(el);
     }));
   }
 
@@ -1896,7 +1906,7 @@ function attachEvents() {
   if (stepId === 'logs_stove') {
     document.querySelectorAll('[data-logs-stove]').forEach(el => el.addEventListener('click', () => {
       state.logs.stoveIdx = el.dataset.logsStove === 'none' ? null : parseInt(el.dataset.logsStove);
-      advanceAfterSelect();
+      advanceAfterSelect(el);
     }));
   }
 
@@ -1918,7 +1928,7 @@ function attachEvents() {
         state.mera.windCover = false;
         state.mera.stainlessCover = false;
       }
-      advanceAfterSelect();
+      advanceAfterSelect(el);
     }));
   }
 
@@ -1930,7 +1940,7 @@ function attachEvents() {
         state.mera.windCover      = false;
         state.mera.stainlessCover = false;
       }
-      advanceAfterSelect();
+      advanceAfterSelect(el);
     }));
   }
 

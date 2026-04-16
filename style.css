@@ -88,6 +88,14 @@ body {
 }
 
 /* ===== CONTAINER ===== */
+@keyframes stepFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.container-entering {
+  animation: stepFadeIn 0.12s ease both;
+}
+
 .container {
   max-width: 860px;
   margin: 0 auto;
