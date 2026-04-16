@@ -874,7 +874,7 @@ function renderSauDimensions() {
       <div class="input-group"><label>幅 W（mm）</label>
         <div class="spin-wrap">
           <button class="spin-btn" data-spin="inp-w" data-dir="-1">－</button>
-          <input type="number" id="inp-w" value="${w}" placeholder="1800" min="100" step="100">
+          <input type="number" id="inp-w" value="${w}" min="100" step="100">
           <button class="spin-btn" data-spin="inp-w" data-dir="1">＋</button>
         </div>
         <div class="input-hint">左右の幅</div>
@@ -882,7 +882,7 @@ function renderSauDimensions() {
       <div class="input-group"><label>奥行き D（mm）</label>
         <div class="spin-wrap">
           <button class="spin-btn" data-spin="inp-d" data-dir="-1">－</button>
-          <input type="number" id="inp-d" value="${d}" placeholder="1800" min="100" step="100">
+          <input type="number" id="inp-d" value="${d}" min="100" step="100">
           <button class="spin-btn" data-spin="inp-d" data-dir="1">＋</button>
         </div>
         <div class="input-hint">前後の奥行き</div>
@@ -890,7 +890,7 @@ function renderSauDimensions() {
       <div class="input-group"><label>高さ H（mm）</label>
         <div class="spin-wrap">
           <button class="spin-btn" data-spin="inp-h" data-dir="-1">－</button>
-          <input type="number" id="inp-h" value="${h}" placeholder="2200" min="100" step="100">
+          <input type="number" id="inp-h" value="${h}" min="100" step="100">
           <button class="spin-btn" data-spin="inp-h" data-dir="1">＋</button>
         </div>
         <div class="input-hint">天井高さ</div>
@@ -1030,7 +1030,7 @@ function renderSauBench() {
       <div class="input-group"><label>ベンチ 長さ（mm）</label>
         <div class="spin-wrap">
           <button class="spin-btn" data-spin="inp-bench" data-dir="-1">－</button>
-          <input type="number" id="inp-bench" value="${bl}" placeholder="1800" min="0" step="100">
+          <input type="number" id="inp-bench" value="${bl}" min="0" step="100">
           <button class="spin-btn" data-spin="inp-bench" data-dir="1">＋</button>
         </div>
         <div class="input-hint">${mat?fmt(benchPrice100):'-'}/100mm${bl&&mat?' → '+fmt(Math.round(parseFloat(bl)/1000*mat.benchPpm)):''}</div>
@@ -1042,7 +1042,7 @@ function renderSauBench() {
       <div class="input-group"><label>桧ベンチ 長さ（mm）</label>
         <div class="spin-wrap">
           <button class="spin-btn" data-spin="inp-hinoki" data-dir="-1">－</button>
-          <input type="number" id="inp-hinoki" value="${hl}" placeholder="1800" min="0" step="100">
+          <input type="number" id="inp-hinoki" value="${hl}" min="0" step="100">
           <button class="spin-btn" data-spin="inp-hinoki" data-dir="1">＋</button>
         </div>
         <div class="input-hint">${fmt(hinokiPrice100)}/100mm${hl?' → '+fmt(Math.round(parseFloat(hl)/1000*HINOKI_PPM)):''}</div>
@@ -1077,7 +1077,7 @@ function renderSauBackrest() {
       <div class="input-group"><label>背もたれ 長さ（mm）</label>
         <div class="spin-wrap">
           <button class="spin-btn" data-spin="inp-backrest" data-dir="-1">－</button>
-          <input type="number" id="inp-backrest" value="${brl}" placeholder="1800" min="0" step="100">
+          <input type="number" id="inp-backrest" value="${brl}" min="0" step="100">
           <button class="spin-btn" data-spin="inp-backrest" data-dir="1">＋</button>
         </div>
         <div class="input-hint">${mat?fmt(backrestPrice100):'-'}/100mm${brl&&mat?' → '+fmt(Math.round(parseFloat(brl)/1000*mat.backrestPpm)):''}</div>
@@ -1717,6 +1717,35 @@ function attachEvents() {
   // ---- megurino ----
   if (stepId === 'sau_dim') {
     // スピンボタン
+    // 寸法プレビューの部分更新ヘルパー（render()を呼ばずDOMのみ更新）
+    const updateDimPartial = () => {
+      const dims = getDims();
+      const previewEl = document.querySelector('.area-preview');
+      const btn = document.getElementById('btn-next');
+      if (dims.valid) {
+        const html =
+          `<div class="area-item">正面・背面 各: <span>${round2(dims.d*dims.h).toFixed(2)} ㎡</span></div>` +
+          `<div class="area-item">側面 各: <span>${round2(dims.w*dims.h).toFixed(2)} ㎡</span></div>` +
+          `<div class="area-item">合計壁面: <span>${round2(2*dims.d*dims.h+2*dims.w*dims.h).toFixed(2)} ㎡</span></div>`;
+        if (previewEl) {
+          previewEl.innerHTML = html;
+        } else {
+          const navBar = document.querySelector('.nav-bar');
+          if (navBar) {
+            const div = document.createElement('div');
+            div.className = 'area-preview';
+            div.innerHTML = html;
+            navBar.parentNode.insertBefore(div, navBar);
+          }
+        }
+        if (btn) btn.disabled = false;
+      } else {
+        if (previewEl) previewEl.remove();
+        if (btn) btn.disabled = true;
+      }
+    };
+
+    // スピンボタン：DOM直接更新のみ（render()不使用）
     document.querySelectorAll('[data-spin]').forEach(btn => btn.addEventListener('click', () => {
       const id  = btn.dataset.spin;
       const dir = parseInt(btn.dataset.dir);
@@ -1724,37 +1753,17 @@ function attachEvents() {
       const cur = parseInt(state.sau[key]) || 0;
       const next = Math.max(100, cur + dir * 100);
       state.sau[key] = String(next);
-      render();
+      const inp = document.getElementById(id);
+      if (inp) inp.value = next;
+      updateDimPartial();
     }));
+
+    // テキスト入力：同じく部分更新のみ
     ['w','d','h'].forEach(dim => {
       const inp = document.getElementById('inp-' + dim);
       if (inp) inp.addEventListener('input', () => {
         state.sau[dim] = inp.value;
-        // Update only the preview area and next-button to avoid cursor issues with type="number"
-        const dims = getDims();
-        const previewEl = document.querySelector('.area-preview');
-        const btn = document.getElementById('btn-next');
-        if (dims.valid) {
-          const html =
-            `<div class="area-item">正面・背面 各: <span>${round2(dims.d*dims.h).toFixed(2)} ㎡</span></div>` +
-            `<div class="area-item">側面 各: <span>${round2(dims.w*dims.h).toFixed(2)} ㎡</span></div>` +
-            `<div class="area-item">合計壁面: <span>${round2(2*dims.d*dims.h+2*dims.w*dims.h).toFixed(2)} ㎡</span></div>`;
-          if (previewEl) {
-            previewEl.innerHTML = html;
-          } else {
-            const navBar = document.querySelector('.nav-bar');
-            if (navBar) {
-              const div = document.createElement('div');
-              div.className = 'area-preview';
-              div.innerHTML = html;
-              navBar.parentNode.insertBefore(div, navBar);
-            }
-          }
-          if (btn) btn.disabled = false;
-        } else {
-          if (previewEl) previewEl.remove();
-          if (btn) btn.disabled = true;
-        }
+        updateDimPartial();
       });
     });
   }
