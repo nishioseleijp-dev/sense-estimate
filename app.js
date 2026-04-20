@@ -9,22 +9,22 @@ const BLANC_SERIES = [
     id: 'clarte', name: 'Clarte', nameJa: 'クラルテ',
     hasOptions: false,
     models: [
-      { name: 'Valence',  img: 'blanc_clarte_valence', sizes: [
+      { name: 'Valence',  nameJa: 'ヴァランス',  img: 'blanc_clarte_valence', sizes: [
         { size: '1400×700×530', price: 1310000 },
         { size: '1500×760×540', price: 1390000 },
         { size: '1620×785×560', price: 1470000 },
         { size: '1700×750×550', price: 1530000 },
       ]},
-      { name: 'Bourges',  img: 'blanc_clarte_bourges', sizes: [
+      { name: 'Bourges',  nameJa: 'ブールジュ',  img: 'blanc_clarte_bourges', sizes: [
         { size: '1450×760×540', price: 1330000 },
         { size: '1600×880×540', price: 1390000 },
         { size: '1700×830×540', price: 1570000 },
         { size: '1800×900×580', price: 1630000 },
       ]},
-      { name: 'Douai',    img: 'blanc_clarte_douai', sizes: [
+      { name: 'Douai',    nameJa: 'ドゥエー',    img: 'blanc_clarte_douai', sizes: [
         { size: '1700×750×560', price: 1430000 },
       ]},
-      { name: 'Metz',     img: 'blanc_clarte_metz', sizes: [
+      { name: 'Metz',     nameJa: 'メッス',      img: 'blanc_clarte_metz', sizes: [
         { size: '1480×720×600', price: 1410000 },
         { size: '1600×760×600', price: 1450000 },
         { size: '1630×850×640', price: 1650000 },
@@ -36,34 +36,34 @@ const BLANC_SERIES = [
     id: 'opaline', name: 'Opaline', nameJa: 'オパリーヌ',
     hasOptions: false,
     models: [
-      { name: 'Dunkerque - ovale', img: 'blanc_opaline_dunkerque_ovale', sizes: [
+      { name: 'Dunkerque - ovale', nameJa: 'ダンケルク - オーバル', img: 'blanc_opaline_dunkerque_ovale', sizes: [
         { size: '1500×740×580', price: 970000 },
         { size: '1700×800×580', price: 1070000 },
       ]},
-      { name: 'Antibes',          img: 'blanc_opaline_antibes', sizes: [
+      { name: 'Antibes',          nameJa: 'アンティーブ',          img: 'blanc_opaline_antibes', sizes: [
         { size: '1500×750×580', price: 790000 },
         { size: '1600×790×580', price: 830000 },
         { size: '1700×770×580', price: 870000 },
       ]},
-      { name: 'Dunkerque - carre', img: 'blanc_opaline_dunkerque_carre', sizes: [
+      { name: 'Dunkerque - carre', nameJa: 'ダンケルク - カレ',    img: 'blanc_opaline_dunkerque_carre', sizes: [
         { size: '1500×740×580', price: 990000 },
         { size: '1700×800×580', price: 1090000 },
       ]},
-      { name: 'Bastia',           img: 'blanc_opaline_bastia', sizes: [
+      { name: 'Bastia',           nameJa: 'バスティア',            img: 'blanc_opaline_bastia', sizes: [
         { size: '1400×750×620', spec: 'ジェットバス', price: 1270000 },
         { size: '1500×750×620', spec: 'ジェットバス', price: 1290000 },
         { size: '1600×750×620', spec: 'ジェットバス', price: 1310000 },
         { size: '1700×750×620', spec: 'ジェットバス', price: 1340000 },
       ]},
-      { name: 'Nantes',           img: 'blanc_opaline_nantes', sizes: [
+      { name: 'Nantes',           nameJa: 'ナント',                img: 'blanc_opaline_nantes', sizes: [
         { size: '1500×1500×600', spec: 'ジェットバス', price: 1410000 },
       ]},
-      { name: 'Rouen',            img: 'blanc_opaline_rouen', sizes: [
+      { name: 'Rouen',            nameJa: 'ルーアン',              img: 'blanc_opaline_rouen', sizes: [
         { size: '1500×750×600', price: 790000 },
         { size: '1600×800×600', price: 810000 },
         { size: '1700×800×600', price: 830000 },
       ]},
-      { name: 'Toulon',           img: 'blanc_opaline_toulon', sizes: [
+      { name: 'Toulon',           nameJa: 'トゥーロン',            img: 'blanc_opaline_toulon', sizes: [
         { size: '1500×750×600', spec: 'ジェットバス', price: 1390000 },
         { size: '1600×800×600', spec: 'ジェットバス', price: 1430000 },
         { size: '1700×800×600', spec: 'ジェットバス', price: 1450000 },
@@ -75,8 +75,8 @@ const BLANC_SERIES = [
     id: 'horizon', name: 'Horizon', nameJa: 'ホライゾン',
     hasOptions: true, jetIncluded: true,
     models: [
-      { name: 'Niort',     img: 'blanc_horizon_niort',     sizes: [{ size: '1600×1600×600', spec: 'ジェットバス', price: 1310000 }]},
-      { name: 'Anglet',    img: 'blanc_horizon_anglet',    sizes: [
+      { name: 'Niort',     nameJa: 'ニオール',      img: 'blanc_horizon_niort',     sizes: [{ size: '1600×1600×600', spec: 'ジェットバス', price: 1310000 }]},
+      { name: 'Anglet',    nameJa: 'アングレット',  img: 'blanc_horizon_anglet',    sizes: [
         { size: '1000×1000×600', spec: 'ジェットバス', price: 1150000 },
         { size: '1100×1100×600', spec: 'ジェットバス', price: 1170000 },
         { size: '1200×1200×600', spec: 'ジェットバス', price: 1190000 },
@@ -88,15 +88,15 @@ const BLANC_SERIES = [
         { size: '1700×1700×600', spec: 'ジェットバス', price: 1330000 },
         { size: '1800×1800×750', spec: 'ジェットバス', price: 1370000 },
       ]},
-      { name: 'Cergy',     img: 'blanc_horizon_cergy',     sizes: [{ size: '1500×1500×600', spec: 'ジェットバス', price: 1190000 }]},
-      { name: 'Troyes',    img: 'blanc_horizon_troyes',    sizes: [
+      { name: 'Cergy',     nameJa: 'セルジー',      img: 'blanc_horizon_cergy',     sizes: [{ size: '1500×1500×600', spec: 'ジェットバス', price: 1190000 }]},
+      { name: 'Troyes',    nameJa: 'トロワ',        img: 'blanc_horizon_troyes',    sizes: [
         { size: '1350×1350×610', spec: 'ジェットバス', price: 1300000 },
         { size: '1400×1400×610', spec: 'ジェットバス', price: 1330000 },
         { size: '1500×1500×610', spec: 'ジェットバス', price: 1350000 },
         { size: '1700×1700×610', spec: 'ジェットバス', price: 1390000 },
         { size: '1800×1800×610', spec: 'ジェットバス', price: 1600000 },
       ]},
-      { name: 'Epinal',    img: 'blanc_horizon_epinal',    sizes: [
+      { name: 'Epinal',    nameJa: 'エピナル',      img: 'blanc_horizon_epinal',    sizes: [
         { size: '1300×700×600', spec: 'ジェットバス', price: 1090000 },
         { size: '1400×750×600', spec: 'ジェットバス', price: 1100000 },
         { size: '1500×750×600', spec: 'ジェットバス', price: 1130000 },
@@ -104,13 +104,13 @@ const BLANC_SERIES = [
         { size: '1700×800×600', spec: 'ジェットバス', price: 1170000 },
         { size: '1800×800×600', spec: 'ジェットバス', price: 1200000 },
       ]},
-      { name: 'Maubeuge',  img: 'blanc_horizon_maubeuge',  sizes: [
+      { name: 'Maubeuge',  nameJa: 'モブージュ',    img: 'blanc_horizon_maubeuge',  sizes: [
         { size: '1600×800×650', spec: 'ジェットバス', price: 930000 },
         { size: '1700×800×650', spec: 'ジェットバス', price: 950000 },
         { size: '1750×750×650', spec: 'ジェットバス', price: 970000 },
         { size: '1800×850×650', spec: 'ジェットバス', price: 990000 },
       ]},
-      { name: 'Sarcelles', img: 'blanc_horizon_sarcelles', sizes: [
+      { name: 'Sarcelles', nameJa: 'サルセル',      img: 'blanc_horizon_sarcelles', sizes: [
         { size: '1200×700×600', spec: 'ジェットバス', price: 1150000 },
         { size: '1300×700×600', spec: 'ジェットバス', price: 1170000 },
         { size: '1400×700×600', spec: 'ジェットバス', price: 1190000 },
@@ -125,8 +125,8 @@ const BLANC_SERIES = [
     id: 'soleil', name: 'Soleil', nameJa: 'ソレイル',
     hasOptions: true, jetIncluded: true,
     models: [
-      { name: 'Niort - Soleil', img: 'blanc_soleil_niort_soleil', sizes: [{ size: '1600×1600×630', spec: 'ジェットバス', price: 1530000 }]},
-      { name: 'Chelles',       img: 'blanc_soleil_chelles',      sizes: [
+      { name: 'Niort - Soleil', nameJa: 'ニオール - ソレイル', img: 'blanc_soleil_niort_soleil', sizes: [{ size: '1600×1600×630', spec: 'ジェットバス', price: 1530000 }]},
+      { name: 'Chelles',       nameJa: 'シェル',               img: 'blanc_soleil_chelles',      sizes: [
         { size: '1450×1450×650', spec: 'ジェットバス', price: 1650000 },
         { size: '1550×1550×650', spec: 'ジェットバス', price: 1670000 },
         { size: '1650×1650×650', spec: 'ジェットバス', price: 1830000 },
@@ -134,33 +134,33 @@ const BLANC_SERIES = [
         { size: '1950×1950×650', spec: 'ジェットバス', price: 2370000 },
         { size: '2050×2050×610', spec: 'ジェットバス', price: 2450000 },
       ]},
-      { name: 'Arles',         img: 'blanc_soleil_arles',        sizes: [{ size: '1800×1700×630', spec: 'ジェットバス', price: 1890000 }]},
+      { name: 'Arles',         nameJa: 'アルル',               img: 'blanc_soleil_arles',        sizes: [{ size: '1800×1700×630', spec: 'ジェットバス', price: 1890000 }]},
     ]
   },
 ];
 
 // 立水栓
 const JAC_TACHI_FAUCETS = [
-  { name: 'スターレ',     img: 'blanc_tachi_stare',     price: 153000 },
-  { name: 'コルムナ',     img: 'blanc_tachi_korumna',   price: 153000 },
-  { name: 'ロクス',       img: 'blanc_tachi_rokusu',    price: 155000 },
-  { name: 'エテルナ',     img: 'blanc_tachi_eterna',    price: 136000 },
-  { name: 'フルメン',     img: 'blanc_tachi_furumen',   price: 136000 },
-  { name: 'オリゴ',       img: 'blanc_tachi_origo',     price: 190000 },
-  { name: 'ソラム',       img: 'blanc_tachi_soramu',    price: 200000 },
-  { name: 'モンス',       img: 'blanc_tachi_monsu',     price: 130000 },
-  { name: 'ヴァルドゥス', img: 'blanc_tachi_varudeusu', price: 130000 },
-  { name: 'ノーヴァ',     img: 'blanc_tachi_nova',      price: 256000 },
+  { code: 'F-STARE',   name: 'スターレ',     img: 'blanc_tachi_stare',     price: 153000 },
+  { code: 'F-COLUMNA', name: 'コルムナ',     img: 'blanc_tachi_korumna',   price: 153000 },
+  { code: 'F-LOCUS',   name: 'ロクス',       img: 'blanc_tachi_rokusu',    price: 155000 },
+  { code: 'F-AETERNA', name: 'エテルナ',     img: 'blanc_tachi_eterna',    price: 136000 },
+  { code: 'F-FLUMEN',  name: 'フルメン',     img: 'blanc_tachi_furumen',   price: 136000 },
+  { code: 'F-ORIGO',   name: 'オリゴ',       img: 'blanc_tachi_origo',     price: 190000 },
+  { code: 'F-SOLUM',   name: 'ソラム',       img: 'blanc_tachi_soramu',    price: 200000 },
+  { code: 'F-MONS',    name: 'モンス',       img: 'blanc_tachi_monsu',     price: 130000 },
+  { code: 'F-VALDUS',  name: 'ヴァルドゥス', img: 'blanc_tachi_varudeusu', price: 130000 },
+  { code: 'F-NOVA',    name: 'ノーヴァ',     img: 'blanc_tachi_nova',      price: 256000 },
 ];
 
 // 水栓
 const JAC_FAUCETS = [
-  { name: 'マヌス',       img: 'blanc_faucet_manusu',    price: 120000 },
-  { name: 'オルビス',     img: 'blanc_faucet_orubisusu', price: 118000 },
-  { name: 'タクトゥス',   img: 'blanc_faucet_takutusu',  price: 129000 },
-  { name: 'リュトミス',   img: 'blanc_faucet_ryutomisu', price: 135000 },
-  { name: 'ゲマ',         img: 'blanc_faucet_gema',      price: 132000 },
-  { name: 'ヴィルトゥス', img: 'blanc_faucet_virutusu',  price: 125000 },
+  { code: 'D-MANUSE',  name: 'マヌス',       img: 'blanc_faucet_manusu',    price: 120000 },
+  { code: 'D-ORBIS',   name: 'オルビス',     img: 'blanc_faucet_orubisusu', price: 118000 },
+  { code: 'D-TACTUS',  name: 'タクトゥス',   img: 'blanc_faucet_takutusu',  price: 129000 },
+  { code: 'D-RHYTHMUS',name: 'リュトミス',   img: 'blanc_faucet_ryutomisu', price: 135000 },
+  { code: 'D-GEMA',    name: 'ゲマ',         img: 'blanc_faucet_gema',      price: 132000 },
+  { code: 'D-VIRTUS',  name: 'ヴィルトゥス', img: 'blanc_faucet_virutusu',  price: 125000 },
 ];
 
 // ============================================================
@@ -491,10 +491,12 @@ function calcJacuzziBreakdown() {
   let faucetName  = null;
   if (jac.faucetType === 'tachi' && jac.faucetIdx !== null) {
     faucetPrice = JAC_TACHI_FAUCETS[jac.faucetIdx].price;
-    faucetName  = '立水栓 — ' + JAC_TACHI_FAUCETS[jac.faucetIdx].name;
+    const tf = JAC_TACHI_FAUCETS[jac.faucetIdx];
+    faucetName  = `立水栓 — ${tf.code} ${tf.name}`;
   } else if (jac.faucetType === 'regular' && jac.faucetIdx !== null) {
     faucetPrice = JAC_FAUCETS[jac.faucetIdx].price;
-    faucetName  = '水栓 — ' + JAC_FAUCETS[jac.faucetIdx].name;
+    const df = JAC_FAUCETS[jac.faucetIdx];
+    faucetName  = `水栓 — ${df.code} ${df.name}`;
   }
 
   const total = basePrice + bubblePrice + ledPrice + faucetPrice;
@@ -755,7 +757,7 @@ function renderJacModel() {
         const pr  = min === max ? fmt(min) : `${fmt(min)} 〜 ${fmt(max)}`;
         return `<div class="card ${sel}" data-idx="${i}">
           ${m.img ? imgWrap(m.img, 'card-img-wrap') : ''}
-          <div class="card-name">${m.name}</div>
+          <div class="card-name"><ruby>${m.name}<rt>${m.nameJa || ''}</rt></ruby></div>
           <div class="card-sub">${m.sizes.length}サイズ展開</div>
           <div class="card-price">${pr}</div>
         </div>`;
@@ -798,7 +800,7 @@ function renderJacFaucet() {
         ${JAC_TACHI_FAUCETS.map((f, i) => `
           <div class="card ${fi === i ? 'selected' : ''}" data-faucet-idx="${i}">
             ${f.img ? imgWrap(f.img, 'card-img-wrap-contain') : ''}
-            <div class="card-name">${f.name}</div>
+            <div class="card-name"><ruby>${f.code}<rt>${f.name}</rt></ruby></div>
             <div class="card-price">${fmt(f.price)}</div>
           </div>`).join('')}
       </div>`;
@@ -808,7 +810,7 @@ function renderJacFaucet() {
         ${JAC_FAUCETS.map((f, i) => `
           <div class="card ${fi === i ? 'selected' : ''}" data-faucet-idx="${i}">
             ${f.img ? imgWrap(f.img, 'card-img-wrap-contain') : ''}
-            <div class="card-name">${f.name}</div>
+            <div class="card-name"><ruby>${f.code}<rt>${f.name}</rt></ruby></div>
             <div class="card-price">${fmt(f.price)}</div>
           </div>`).join('')}
       </div>`;
