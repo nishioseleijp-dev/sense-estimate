@@ -37,16 +37,16 @@ const BLANC_SERIES = [
     hasOptions: false,
     models: [
       { name: 'Dunkerque - ovale', img: 'blanc_opaline_dunkerque_ovale', sizes: [
-        { size: '1500×740×580', spec: 'スタンド水栓', price: 970000 },
+        { size: '1500×740×580', price: 970000 },
         { size: '1700×800×580', price: 1070000 },
       ]},
       { name: 'Antibes',          img: 'blanc_opaline_antibes', sizes: [
-        { size: '1500×750×580', spec: 'スタンド水栓', price: 790000 },
+        { size: '1500×750×580', price: 790000 },
         { size: '1600×790×580', price: 830000 },
         { size: '1700×770×580', price: 870000 },
       ]},
       { name: 'Dunkerque - carre', img: 'blanc_opaline_dunkerque_carre', sizes: [
-        { size: '1500×740×580', spec: 'スタンド水栓', price: 990000 },
+        { size: '1500×740×580', price: 990000 },
         { size: '1700×800×580', price: 1090000 },
       ]},
       { name: 'Bastia',           img: 'blanc_opaline_bastia', sizes: [
@@ -59,8 +59,8 @@ const BLANC_SERIES = [
         { size: '1500×1500×600', spec: 'ジェットバス', price: 1410000 },
       ]},
       { name: 'Rouen',            img: 'blanc_opaline_rouen', sizes: [
-        { size: '1500×750×600', spec: 'スタンド水栓',  price: 790000 },
-        { size: '1600×800×600', spec: 'ハンドシャワー', price: 810000 },
+        { size: '1500×750×600', price: 790000 },
+        { size: '1600×800×600', price: 810000 },
         { size: '1700×800×600', price: 830000 },
       ]},
       { name: 'Toulon',           img: 'blanc_opaline_toulon', sizes: [
@@ -633,9 +633,13 @@ function renderProgressBar(steps, currentIdx) {
 }
 
 function renderNavBar(backLabel, nextLabel, nextDisabled) {
+  const showBack = state.stepIndex > 0;
   return `<div class="nav-bar"><div class="nav-bar-inner">
-    <button class="btn btn-secondary" id="btn-back">${backLabel}</button>
-    <button class="btn btn-primary" id="btn-next" ${nextDisabled ? 'disabled' : ''}>${nextLabel}</button>
+    <button class="btn btn-secondary" id="btn-top">← トップへ戻る</button>
+    <div style="display:flex;gap:8px;">
+      ${showBack ? `<button class="btn btn-secondary" id="btn-back">← 戻る</button>` : ''}
+      <button class="btn btn-primary" id="btn-next" ${nextDisabled ? 'disabled' : ''}>${nextLabel}</button>
+    </div>
   </div></div>`;
 }
 
@@ -722,22 +726,19 @@ function renderJacSeries() {
   return `
     <div class="step-title">シリーズを選択</div>
     <div class="step-sub">blanc（ブラン）のシリーズをお選びください</div>
+    ${renderNavBar('← トップへ戻る', '次へ →', state.jac.seriesIdx === null)}
     <div class="card-grid two-col">
       ${BLANC_SERIES.map((s, i) => {
         const sel = state.jac.seriesIdx === i ? 'selected' : '';
-        const tagClass = s.hasOptions ? 'card-series-overlay-tag green' : 'card-series-overlay-tag';
-        const tagText  = s.hasOptions ? 'ジェット初期仕様・バブル・LED対応' : 'ジェット・バブル・LEDなし';
         return `<div class="card-series-overlay ${sel}" data-idx="${i}">
           <img class="card-series-overlay-img" src="images/blanc_${s.id}.jpg.jpg?v=3" alt="" onerror="this.src='images/blanc_${s.id}.jpg.jpeg?v=3';this.onerror=function(){this.src='images/blanc_${s.id}.jpg.png?v=3';this.onerror=function(){this.src='images/blanc_${s.id}.jpg?v=3';this.onerror=function(){this.style.display='none';}};}">
           <div class="card-series-overlay-body">
             <div class="card-series-overlay-name">${s.name}</div>
             <div class="card-series-overlay-sub">${s.nameJa}</div>
-            <span class="${tagClass}">${tagText}</span>
           </div>
         </div>`;
       }).join('')}
-    </div>
-    ${renderNavBar('← トップへ戻る', '次へ →', state.jac.seriesIdx === null)}`;
+    </div>`;
 }
 
 function renderJacModel() {
@@ -745,6 +746,7 @@ function renderJacModel() {
   return `
     <div class="step-title">モデルを選択</div>
     <div class="step-sub">${series.name}（${series.nameJa}）のモデルをお選びください</div>
+    ${renderNavBar('← 戻る', '次へ →', state.jac.modelIdx === null)}
     <div class="card-grid">
       ${series.models.map((m, i) => {
         const sel = state.jac.modelIdx === i ? 'selected' : '';
@@ -758,8 +760,7 @@ function renderJacModel() {
           <div class="card-price">${pr}</div>
         </div>`;
       }).join('')}
-    </div>
-    ${renderNavBar('← 戻る', '次へ →', state.jac.modelIdx === null)}`;
+    </div>`;
 }
 
 function renderJacSize() {
@@ -768,6 +769,7 @@ function renderJacSize() {
   return `
     <div class="step-title">サイズを選択</div>
     <div class="step-sub">${series.name} / ${model.name}</div>
+    ${renderNavBar('← 戻る', '次へ →', state.jac.sizeIdx === null)}
     <table class="size-table">
       <thead><tr><th>サイズ（mm）</th><th>仕様</th><th>定価</th></tr></thead>
       <tbody>
@@ -781,8 +783,7 @@ function renderJacSize() {
           </tr>`;
         }).join('')}
       </tbody>
-    </table>
-    ${renderNavBar('← 戻る', '次へ →', state.jac.sizeIdx === null)}`;
+    </table>`;
 }
 
 function renderJacFaucet() {
@@ -818,6 +819,7 @@ function renderJacFaucet() {
   return `
     <div class="step-title">水栓を選択</div>
     <div class="step-sub">浴槽に取り付ける水栓をお選びください</div>
+    ${renderNavBar('← 戻る', '次へ →', !isValid)}
     <div class="section-label">水栓タイプ</div>
     <div class="radio-group">
       <label class="radio-btn ${ft==='none'?'checked':''}" data-faucet-type="none">
@@ -826,8 +828,7 @@ function renderJacFaucet() {
       ${avail.tachi   ? `<label class="radio-btn ${ft==='tachi'  ?'checked':''}" data-faucet-type="tachi"><input type="radio" name="ft">立水栓</label>` : ''}
       ${avail.regular ? `<label class="radio-btn ${ft==='regular'?'checked':''}" data-faucet-type="regular"><input type="radio" name="ft">水栓</label>` : ''}
     </div>
-    ${listHtml}
-    ${renderNavBar('← 戻る', '次へ →', !isValid)}`;
+    ${listHtml}`;
 }
 
 function renderJacOptions() {
@@ -835,6 +836,7 @@ function renderJacOptions() {
   return `
     <div class="step-title">オプションを選択</div>
     <div class="step-sub">${series.name}（${series.nameJa}）の追加オプション</div>
+    ${renderNavBar('← 戻る', '次へ →', false)}
     <div class="info-box">ジェットバスは初期仕様として含まれています。バブルおよびLEDは各 ${fmt(OPTION_PRICE)} で追加可能です。</div>
     <div class="section-label">追加オプション</div>
     <div class="checkbox-list">
@@ -846,8 +848,7 @@ function renderJacOptions() {
         <div class="checkbox-label"><div class="check-icon"></div>LED（Big LED）</div>
         <div class="checkbox-price">${fmt(OPTION_PRICE)}</div>
       </div>
-    </div>
-    ${renderNavBar('← 戻る', '次へ →', false)}`;
+    </div>`;
 }
 
 // ============================================================
@@ -861,15 +862,16 @@ function renderSauBanner() {
 function renderSauDimensions() {
   const { w, d, h } = state.sau;
   const dims = getDims();
-  const preview = dims.valid ? `<div class="area-preview">
-    <div class="area-item">正面・背面 各: <span>${round2(dims.d*dims.h).toFixed(2)} ㎡</span></div>
-    <div class="area-item">側面 各: <span>${round2(dims.w*dims.h).toFixed(2)} ㎡</span></div>
-    <div class="area-item">合計壁面: <span>${round2(2*dims.d*dims.h+2*dims.w*dims.h).toFixed(2)} ㎡</span></div>
-  </div>` : '';
+  const previewContent = dims.valid
+    ? `<div class="area-item">正面・背面 各: <span>${round2(dims.d*dims.h).toFixed(2)} ㎡</span></div>` +
+      `<div class="area-item">側面 各: <span>${round2(dims.w*dims.h).toFixed(2)} ㎡</span></div>` +
+      `<div class="area-item">合計壁面: <span>${round2(2*dims.d*dims.h+2*dims.w*dims.h).toFixed(2)} ㎡</span></div>`
+    : '';
   return `
-    ${renderSauBanner()}
     <div class="step-title">サウナ寸法を入力</div>
     <div class="step-sub">内寸をミリメートル（mm）単位で入力してください</div>
+    ${renderNavBar('← トップへ戻る', '次へ →', !dims.valid)}
+    ${renderSauBanner()}
     <div class="input-row">
       <div class="input-group"><label>幅 W（mm）</label>
         <div class="spin-wrap">
@@ -896,14 +898,14 @@ function renderSauDimensions() {
         <div class="input-hint">天井高さ</div>
       </div>
     </div>
-    ${preview}
-    ${renderNavBar('← トップへ戻る', '次へ →', !dims.valid)}`;
+    <div class="area-preview" id="dim-preview">${previewContent}</div>`;
 }
 
 function renderSauMaterial() {
   return `
     <div class="step-title">木材を選択</div>
     <div class="step-sub">壁面に使用する木材の種類をお選びください（1種類のみ）</div>
+    ${renderNavBar('← 戻る', '次へ →', state.sau.material === null)}
     <div class="card-grid three-col">
       ${SAU_MATERIALS.map((m, i) => `
         <div class="card ${state.sau.material===i?'selected':''}" data-idx="${i}">
@@ -912,8 +914,7 @@ function renderSauMaterial() {
           <div class="card-price">${fmt(m.pricePerSqm)}/㎡</div>
           <div class="card-sub" style="margin-top:6px">ベンチ ${fmt(m.benchPpm)}/m<br>背もたれ ${fmt(m.backrestPpm)}/m</div>
         </div>`).join('')}
-    </div>
-    ${renderNavBar('← 戻る', '次へ →', state.sau.material === null)}`;
+    </div>`;
 }
 
 function renderSauGlass() {
@@ -968,6 +969,7 @@ function renderSauGlass() {
   return `
     <div class="step-title">ガラス面の設定</div>
     <div class="step-sub">ガラスを設置する壁面と種類を選択してください（任意）</div>
+    ${renderNavBar('← 戻る', '次へ →', false)}
     <div class="info-box">正面：${fa} ㎡　／　側面：${sa} ㎡<br>FIXガラス ${fmt(FIX_GLASS_PPM)}/㎡　ガラス扉 ${fmt(GLASS_DOOR_FIXED)}（固定）</div>
     <div class="section-label">ガラス面の位置</div>
     <div class="radio-group">
@@ -980,8 +982,7 @@ function renderSauGlass() {
     ${gp==='front'     ? glassTypeDoorOnly('正面',  fg, 'front') : ''}
     ${gp==='side'      ? glassTypeDoorOnly('側面A', sg, 'side')  : ''}
     ${gp==='frontside' ? glassTypeFull('正面',  fg, 'front', sideFixOnly,  sideHasDoor)  : ''}
-    ${gp==='frontside' ? glassTypeFull('側面A', sg, 'side',  frontFixOnly, frontHasDoor) : ''}
-    ${renderNavBar('← 戻る', '次へ →', false)}`;
+    ${gp==='frontside' ? glassTypeFull('側面A', sg, 'side',  frontFixOnly, frontHasDoor) : ''}`;
 }
 
 function renderSauTile() {
@@ -989,11 +990,12 @@ function renderSauTile() {
   if (!walls.length) return `
     <div class="step-title">壁面タイル</div>
     <div class="step-sub">タイルを貼る面を選択してください（任意）</div>
-    <div class="info-box">木材壁面がありません。前のステップで設定を確認してください。</div>
-    ${renderNavBar('← 戻る', '次へ →', false)}`;
+    ${renderNavBar('← 戻る', '次へ →', false)}
+    <div class="info-box">木材壁面がありません。前のステップで設定を確認してください。</div>`;
   return `
     <div class="step-title">壁面タイル</div>
     <div class="step-sub">タイルを貼る木材壁面を選択してください（任意）/ ${fmt(TILE_PPM)}/㎡</div>
+    ${renderNavBar('← 戻る', '次へ →', false)}
     <div class="info-box">木材壁面にのみ追加可能です。複数面の選択ができます。</div>
     <div class="wall-grid">
       ${walls.map(w => {
@@ -1008,8 +1010,7 @@ function renderSauTile() {
           <div class="wall-card-price">タイル追加: ${fmt(round2(w.area*TILE_PPM))}</div>
         </div>`;
       }).join('')}
-    </div>
-    ${renderNavBar('← 戻る', '次へ →', false)}`;
+    </div>`;
 }
 
 function renderSauBench() {
@@ -1052,14 +1053,14 @@ function renderSauBench() {
   return `
     <div class="step-title">ベンチ</div>
     <div class="step-sub">ベンチの種別を選択し、長さ（mm）を入力してください（不要の場合はそのまま次へ）</div>
+    ${renderNavBar('← 戻る', '次へ →', false)}
     <div class="section-label">ベンチ種別（どちらか一方）</div>
     <div class="radio-group">
       <label class="radio-btn ${bt==='normal'?'checked':''}" data-bench-type="normal">通常ベンチ（材質：${matName}）</label>
       <label class="radio-btn ${bt==='hinoki'?'checked':''}" data-bench-type="hinoki">megurino 桧ベンチ</label>
     </div>
     ${normalInputHtml}
-    ${hinokiInputHtml}
-    ${renderNavBar('← 戻る', '次へ →', false)}`;
+    ${hinokiInputHtml}`;
 }
 
 function renderSauBackrest() {
@@ -1072,6 +1073,7 @@ function renderSauBackrest() {
   return `
     <div class="step-title">背もたれ</div>
     <div class="step-sub">背もたれの長さ（mm）を入力してください（不要の場合は空欄）</div>
+    ${renderNavBar('← 戻る', '次へ →', false)}
     <div class="section-label">背もたれ（材質：${matName}）</div>
     <div class="input-row">
       <div class="input-group"><label>背もたれ 長さ（mm）</label>
@@ -1082,8 +1084,7 @@ function renderSauBackrest() {
         </div>
         <div class="input-hint">${mat?fmt(backrestPrice100):'-'}/100mm${brl&&mat?' → '+fmt(Math.round(parseFloat(brl)/1000*mat.backrestPpm)):''}</div>
       </div>
-    </div>
-    ${renderNavBar('← 戻る', '次へ →', false)}`;
+    </div>`;
 }
 
 function renderSauRoof() {
@@ -1092,6 +1093,7 @@ function renderSauRoof() {
   return `
     <div class="step-title">屋外防水屋根</div>
     <div class="step-sub">屋外設置の場合、防水屋根を追加できます（任意）</div>
+    ${renderNavBar('← 戻る', '次へ →', false)}
     <div class="info-box">W × D = ${area.toFixed(2)} ㎡ × ${fmt(ROOF_PPM)}/㎡ = ${fmt(area*ROOF_PPM)}</div>
     <div class="toggle-row ${state.sau.roofEnabled?'checked':''}" id="toggle-roof">
       <div class="toggle-row-left">
@@ -1099,50 +1101,49 @@ function renderSauRoof() {
         <div class="toggle-row-desc">${fmt(ROOF_PPM)}/㎡ × ${area.toFixed(2)} ㎡ = ${fmt(area*ROOF_PPM)}</div>
       </div>
       <div class="toggle-pill"></div>
-    </div>
-    ${renderNavBar('← 戻る', '次へ →', false)}`;
+    </div>`;
 }
 
 function renderSauStove() {
   return `
     <div class="step-title">ストーブを選択</div>
     <div class="step-sub">HARVIAストーブをお選びください（任意）</div>
+    ${renderNavBar('← 戻る', '次へ →', false)}
     <div class="stove-option stove-option-none ${state.sau.stoveIdx===null?'selected':''}" data-stove="none">
       <div class="stove-name">選択しない</div><div class="stove-price">—</div>
     </div>
     ${SAU_STOVES.map((s, i) => `
       <div class="stove-option ${state.sau.stoveIdx===i?'selected':''}" data-stove="${i}">
         <div class="stove-name">${s.name}</div><div class="stove-price">${fmt(s.price)}</div>
-      </div>`).join('')}
-    ${renderNavBar('← 戻る', '次へ →', false)}`;
+      </div>`).join('')}`;
 }
 
 function renderSauFuncOptions() {
   return `
     <div class="step-title">機能オプション</div>
     <div class="step-sub">追加したいオプションをお選びください（複数選択可）</div>
+    ${renderNavBar('← 戻る', '次へ →', false)}
     <div class="checkbox-list">
       ${FUNC_OPTIONS.map((o, i) => `
         <div class="checkbox-item ${state.sau.funcOptions[i]?'checked':''}" data-func="${i}">
           <div class="checkbox-label"><div class="check-icon"></div>${o.name}</div>
           <div class="checkbox-price">${fmt(o.price)}</div>
         </div>`).join('')}
-    </div>
-    ${renderNavBar('← 戻る', '次へ →', false)}`;
+    </div>`;
 }
 
 function renderSauAccessories() {
   return `
     <div class="step-title">オプションパーツ</div>
     <div class="step-sub">必要なパーツをお選びください（複数選択可）</div>
+    ${renderNavBar('← 戻る', '次へ →', false)}
     <div class="checkbox-list">
       ${SAU_ACCESSORIES.map((a, i) => `
         <div class="checkbox-item ${state.sau.accessories[i]?'checked':''}" data-acc="${i}">
           <div class="checkbox-label"><div class="check-icon"></div>${a.name}</div>
           <div class="checkbox-price">${fmt(a.price)}</div>
         </div>`).join('')}
-    </div>
-    ${renderNavBar('← 戻る', '次へ →', false)}`;
+    </div>`;
 }
 
 // ============================================================
@@ -1158,6 +1159,7 @@ function renderLogsSize() {
   return `
     <div class="step-title">サイズを選択</div>
     <div class="step-sub">LOGS SAUNA バレルサウナの長さをお選びください</div>
+    ${renderNavBar('← トップへ戻る', '次へ →', state.logs.sizeIdx === null)}
     <div class="card-grid three-col">
       ${sizes.map((s, i) => `
         <div class="card ${state.logs.sizeIdx===i?'selected':''}" data-logs-size="${i}">
@@ -1165,8 +1167,7 @@ function renderLogsSize() {
           <div class="card-name">${s.label}</div>
           <div class="card-sub">${s.sub}</div>
         </div>`).join('')}
-    </div>
-    ${renderNavBar('← トップへ戻る', '次へ →', state.logs.sizeIdx === null)}`;
+    </div>`;
 }
 
 function renderLogsMaterial() {
@@ -1177,6 +1178,7 @@ function renderLogsMaterial() {
   return `
     <div class="step-title">材質を選択</div>
     <div class="step-sub">${sizeLabel} の材質をお選びください</div>
+    ${renderNavBar('← 戻る', '次へ →', !materialValid)}
     <div class="card-grid three-col">
       ${barrels.map((b, i) => {
         const idx = si * 3 + i;
@@ -1185,8 +1187,7 @@ function renderLogsMaterial() {
           <div class="card-price">${fmt(b.price)}</div>
         </div>`;
       }).join('')}
-    </div>
-    ${renderNavBar('← 戻る', '次へ →', !materialValid)}`;
+    </div>`;
 }
 
 function renderLogsFront() {
@@ -1194,56 +1195,56 @@ function renderLogsFront() {
   return `
     <div class="step-title">正面素材を選択</div>
     <div class="step-sub">正面の仕上げ素材をお選びください（任意）</div>
+    ${renderNavBar('← 戻る', '次へ →', false)}
     <div class="stove-option stove-option-none ${fi===null?'selected':''}" data-logs-front="none">
       <div class="stove-name">選択しない</div><div class="stove-price">—</div>
     </div>
     ${LOGS_FRONT_OPTIONS.map((o, i) => `
       <div class="stove-option ${fi===i?'selected':''}" data-logs-front="${i}">
         <div class="stove-name">${o.name}</div><div class="stove-price">${fmt(o.price)}</div>
-      </div>`).join('')}
-    ${renderNavBar('← 戻る', '次へ →', false)}`;
+      </div>`).join('')}`;
 }
 
 function renderLogsRoof() {
   return `
     <div class="step-title">防水屋根</div>
     <div class="step-sub">防水屋根の追加を選択してください（任意）</div>
+    ${renderNavBar('← 戻る', '次へ →', false)}
     <div class="toggle-row ${state.logs.roofEnabled?'checked':''}" id="toggle-logs-roof">
       <div class="toggle-row-left">
         <div class="toggle-row-name">防水屋根</div>
         <div class="toggle-row-desc">${fmt(66000)}（固定）</div>
       </div>
       <div class="toggle-pill"></div>
-    </div>
-    ${renderNavBar('← 戻る', '次へ →', false)}`;
+    </div>`;
 }
 
 function renderLogsStove() {
   return `
     <div class="step-title">ストーブを選択</div>
     <div class="step-sub">HARVIAストーブをお選びください（任意）</div>
+    ${renderNavBar('← 戻る', '次へ →', false)}
     <div class="stove-option stove-option-none ${state.logs.stoveIdx===null?'selected':''}" data-logs-stove="none">
       <div class="stove-name">選択しない</div><div class="stove-price">—</div>
     </div>
     ${LOGS_STOVES.map((s, i) => `
       <div class="stove-option ${state.logs.stoveIdx===i?'selected':''}" data-logs-stove="${i}">
         <div class="stove-name">${s.name}</div><div class="stove-price">${fmt(s.price)}</div>
-      </div>`).join('')}
-    ${renderNavBar('← 戻る', '次へ →', false)}`;
+      </div>`).join('')}`;
 }
 
 function renderLogsAccessories() {
   return `
     <div class="step-title">アクセサリー</div>
     <div class="step-sub">必要なアクセサリーをお選びください（複数選択可）</div>
+    ${renderNavBar('← 戻る', '次へ →', false)}
     <div class="checkbox-list">
       ${LOGS_ACCESSORIES.map((a, i) => `
         <div class="checkbox-item ${state.logs.accessories[i]?'checked':''}" data-logs-acc="${i}">
           <div class="checkbox-label"><div class="check-icon"></div>${a.name}</div>
           <div class="checkbox-price">${fmt(a.price)}</div>
         </div>`).join('')}
-    </div>
-    ${renderNavBar('← 戻る', '次へ →', false)}`;
+    </div>`;
 }
 
 // ============================================================
@@ -1254,6 +1255,7 @@ function renderMeraSeries() {
   return `
     <div class="step-title">シリーズを選択</div>
     <div class="step-sub">mera（メラ）ガス暖炉のシリーズをお選びください</div>
+    ${renderNavBar('← トップへ戻る', '次へ →', state.mera.seriesIdx === null)}
     <div class="card-grid three-col">
       ${MERA_SERIES.map((s, i) => {
         const min = Math.min(...s.models.map(m => m.price));
@@ -1266,8 +1268,7 @@ function renderMeraSeries() {
           <div class="card-price">${pr}</div>
         </div>`;
       }).join('')}
-    </div>
-    ${renderNavBar('← トップへ戻る', '次へ →', state.mera.seriesIdx === null)}`;
+    </div>`;
 }
 
 function renderMeraModel() {
@@ -1275,6 +1276,7 @@ function renderMeraModel() {
   return `
     <div class="step-title">モデルを選択</div>
     <div class="step-sub">${series.name}のモデルをお選びください</div>
+    ${renderNavBar('← 戻る', '次へ →', state.mera.modelIdx === null)}
     <div class="card-grid">
       ${series.models.map((m, i) => `
         <div class="card ${state.mera.modelIdx===i?'selected':''}" data-idx="${i}">
@@ -1283,8 +1285,7 @@ function renderMeraModel() {
           <div class="card-sub">${m.size}</div>
           <div class="card-price">${fmt(m.price)}</div>
         </div>`).join('')}
-    </div>
-    ${renderNavBar('← 戻る', '次へ →', state.mera.modelIdx === null)}`;
+    </div>`;
 }
 
 function renderMeraCovers() {
@@ -1293,6 +1294,7 @@ function renderMeraCovers() {
   return `
     <div class="step-title">カバーを選択</div>
     <div class="step-sub">オプションカバーをお選びください（複数選択可）</div>
+    ${renderNavBar('← 戻る', '次へ →', false)}
     <div class="card-grid two-col">
       <div class="card ${state.mera.windCover?'selected':''}" id="mera-wind">
         ${imgWrap('mera_cover_wind', 'card-img-wrap')}
@@ -1304,8 +1306,7 @@ function renderMeraCovers() {
         <div class="card-name">ステンレスカバー</div>
         <div class="card-price">${fmt(model.stainlessCover)}</div>
       </div>
-    </div>
-    ${renderNavBar('← 戻る', '次へ →', false)}`;
+    </div>`;
 }
 
 // ============================================================
@@ -1331,6 +1332,7 @@ function renderDiscount() {
   return `
     <div class="step-title">値引き設定</div>
     <div class="step-sub">値引き率をお選びください</div>
+    ${renderNavBar('← 戻る', '見積もりを確認 →', !isDiscountValid())}
     <div class="radio-group" style="flex-wrap:wrap">
       <label class="radio-btn ${d.type==='none'  ?'checked':''}" data-disc="none"  ><input type="radio" name="disc">値引きなし</label>
       <label class="radio-btn ${d.type==='10'    ?'checked':''}" data-disc="10"    ><input type="radio" name="disc">10% 引き</label>
@@ -1345,8 +1347,7 @@ function renderDiscount() {
           <input type="number" id="inp-disc" value="${d.custom}" min="0" max="100" step="0.1" placeholder="例: 15">
         </div>
       </div>` : ''}
-    ${previewHtml}
-    ${renderNavBar('← 戻る', '見積もりを確認 →', !isDiscountValid())}`;
+    ${previewHtml}`;
 }
 
 // ============================================================
@@ -1389,7 +1390,7 @@ function renderEstimateJacuzzi() {
     <div class="step-title">見積もり結果</div>
     <div class="step-sub">blanc（ブラン）ジャグジー</div>
     <div class="estimate-wrap">
-      ${heroImg('blanc_' + bd.series.id, 'estimate-hero-img')}
+      ${heroImg('blanc', 'estimate-hero-img')}
       <div class="estimate-header">簡易見積もり — blanc ジャグジー</div>
       <div class="estimate-section">
         ${sections.join('')}
@@ -1446,7 +1447,7 @@ function renderEstimateSauna() {
     <div class="step-title">見積もり結果</div>
     <div class="step-sub">megurino（メグリノ）サウナ</div>
     <div class="estimate-wrap">
-      ${heroImg('megurino_' + bd.mat.id, 'estimate-hero-img')}
+      ${heroImg('megurino', 'estimate-hero-img')}
       <div class="estimate-header">簡易見積もり — megurino サウナ</div>
       <div class="estimate-section">
         ${sections.join('')}
@@ -1487,7 +1488,7 @@ function renderEstimateLogs() {
     <div class="step-title">見積もり結果</div>
     <div class="step-sub">LOGS SAUNA バレルサウナ</div>
     <div class="estimate-wrap">
-      ${heroImg(logsImgKey, 'estimate-hero-img')}
+      ${heroImg('logs', 'estimate-hero-img')}
       <div class="estimate-header">簡易見積もり — LOGS SAUNA バレルサウナ</div>
       <div class="estimate-section">
         ${sections.join('')}
@@ -1519,7 +1520,7 @@ function renderEstimateMera() {
     <div class="step-title">見積もり結果</div>
     <div class="step-sub">mera（メラ）ガス暖炉</div>
     <div class="estimate-wrap">
-      ${heroImg('mera_' + bd.series.id, 'estimate-hero-img')}
+      ${heroImg('mera', 'estimate-hero-img')}
       <div class="estimate-header">簡易見積もり — mera ガス暖炉</div>
       <div class="estimate-section">
         ${sections.join('')}
@@ -1534,19 +1535,9 @@ function renderEstimateMera() {
 // MAIN RENDER
 // ============================================================
 
-// 選択後に自動で次ステップへ進むヘルパー（150ms後に進む）
 function advanceAfterSelect(el) {
-  // フルレンダリングせずDOM直接操作で選択ハイライト
-  if (el) {
-    const grid = el.closest('.card-grid, .card-series-overlay-wrap');
-    const scope = grid || document;
-    scope.querySelectorAll('.selected').forEach(e => e.classList.remove('selected'));
-    el.classList.add('selected');
-  }
-  setTimeout(() => {
-    state.error = '';
-    if (validateStep()) { state.stepIndex++; render(); }
-  }, 120);
+  state.error = '';
+  render();
 }
 
 let _prevStepId = null;
@@ -1631,16 +1622,20 @@ function attachEvents() {
     });
   });
 
+  // Top
+  const btnTop = document.getElementById('btn-top');
+  if (btnTop) btnTop.addEventListener('click', () => {
+    state.error       = '';
+    state.productType = null;
+    state.stepIndex   = 0;
+    render();
+  });
+
   // Back
   const btnBack = document.getElementById('btn-back');
   if (btnBack) btnBack.addEventListener('click', () => {
     state.error = '';
-    if (state.stepIndex === 0) {
-      state.productType = null;
-      state.stepIndex   = 0;
-    } else {
-      state.stepIndex--;
-    }
+    state.stepIndex--;
     render();
   });
 
@@ -1720,27 +1715,16 @@ function attachEvents() {
     // 寸法プレビューの部分更新ヘルパー（render()を呼ばずDOMのみ更新）
     const updateDimPartial = () => {
       const dims = getDims();
-      const previewEl = document.querySelector('.area-preview');
+      const previewEl = document.getElementById('dim-preview');
       const btn = document.getElementById('btn-next');
       if (dims.valid) {
-        const html =
+        if (previewEl) previewEl.innerHTML =
           `<div class="area-item">正面・背面 各: <span>${round2(dims.d*dims.h).toFixed(2)} ㎡</span></div>` +
           `<div class="area-item">側面 各: <span>${round2(dims.w*dims.h).toFixed(2)} ㎡</span></div>` +
           `<div class="area-item">合計壁面: <span>${round2(2*dims.d*dims.h+2*dims.w*dims.h).toFixed(2)} ㎡</span></div>`;
-        if (previewEl) {
-          previewEl.innerHTML = html;
-        } else {
-          const navBar = document.querySelector('.nav-bar');
-          if (navBar) {
-            const div = document.createElement('div');
-            div.className = 'area-preview';
-            div.innerHTML = html;
-            navBar.parentNode.insertBefore(div, navBar);
-          }
-        }
         if (btn) btn.disabled = false;
       } else {
-        if (previewEl) previewEl.remove();
+        if (previewEl) previewEl.innerHTML = '';
         if (btn) btn.disabled = true;
       }
     };
