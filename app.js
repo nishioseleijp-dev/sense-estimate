@@ -324,6 +324,7 @@ const state = {
   },
 
   discount: { type: null, custom: '' },
+  savedEstimates: [],
 };
 
 // ============================================================
@@ -451,8 +452,9 @@ const IMG_V = '?v=3';
 function imgWrap(filename, wrapClass) {
   return `<div class="${wrapClass}"><img src="images/${filename}.jpg.jpg?v=3" alt="" onerror="this.src='images/${filename}.jpg.jpeg?v=3';this.onerror=function(){this.src='images/${filename}.jpg.png?v=3';this.onerror=function(){this.src='images/${filename}.jpg?v=3';this.onerror=function(){this.parentElement.style.display='none';}}}"></div>`;
 }
-function heroImg(filename, cssClass) {
-  return `<img class="${cssClass}" src="images/${filename}.jpg.jpg?v=3" alt="" onerror="this.src='images/${filename}.jpg.jpeg?v=3';this.onerror=function(){this.src='images/${filename}.jpg.png?v=3';this.onerror=function(){this.src='images/${filename}.jpg?v=3';this.onerror=function(){this.style.display='none';}}}">`;
+function heroImg(filename, cssClass, style) {
+  const styleAttr = style ? ` style="${style}"` : '';
+  return `<img class="${cssClass}"${styleAttr} src="images/${filename}.jpg.jpg?v=3" alt="" onerror="this.src='images/${filename}.jpg.jpeg?v=3';this.onerror=function(){this.src='images/${filename}.jpg.png?v=3';this.onerror=function(){this.src='images/${filename}.jpg?v=3';this.onerror=function(){this.style.display='none';}}}">`;
 }
 
 function isDiscountValid() {
@@ -650,9 +652,131 @@ function renderEstimateFooter() {
     <button class="btn btn-secondary" id="btn-back">← 戻る</button>
     <div style="display:flex;gap:10px;">
       <button class="btn btn-print" onclick="window.print()">🖨 印刷</button>
+      <button class="btn btn-secondary" id="btn-add-product">＋ 別製品を追加</button>
       <button class="btn btn-secondary" id="btn-restart">最初からやり直す</button>
     </div>
   </div></div>`;
+}
+
+function saveCurrentEstimate() {
+  let label = '', heroKey = '', headerText = '', subtotal = 0, sectionsHtml = '';
+
+  if (state.productType === 'jacuzzi') {
+    const bd = calcJacuzziBreakdown(); if (!bd) return false;
+    label = `blanc — ${bd.series.name} ${bd.model.name} ${bd.size.size}`;
+    heroKey = 'blanc'; headerText = '簡易見積もり — blanc ジャグジー'; subtotal = bd.total;
+    const s = [];
+    s.push(`<div class="estimate-section-title">本体</div><div class="estimate-row"><div class="estimate-row-label">${bd.series.name}（${bd.series.nameJa}）— ${bd.model.name} ${bd.size.size}${bd.size.spec ? ` <span class="spec-badge">${bd.size.spec}</span>` : ''}</div><div class="estimate-row-price">${fmt(bd.basePrice)}</div></div>`);
+    if (bd.faucetName) s.push(`<div class="estimate-section-title">水栓</div><div class="estimate-row"><div class="estimate-row-label">${bd.faucetName}</div><div class="estimate-row-price">${fmt(bd.faucetPrice)}</div></div>`);
+    if (bd.series.hasOptions) {
+      const opts = [];
+      if (bd.series.jetIncluded) opts.push(`<div class="estimate-row"><div class="estimate-row-label">ジェット<span class="estimate-row-detail">（初期仕様含む）</span></div><div class="estimate-row-price" style="color:#AAAAAA">含む</div></div>`);
+      if (bd.bubblePrice) opts.push(`<div class="estimate-row"><div class="estimate-row-label">バブル</div><div class="estimate-row-price">${fmt(bd.bubblePrice)}</div></div>`);
+      if (bd.ledPrice) opts.push(`<div class="estimate-row"><div class="estimate-row-label">LED（Big LED）</div><div class="estimate-row-price">${fmt(bd.ledPrice)}</div></div>`);
+      if (opts.length) s.push(`<div class="estimate-section-title">オプション</div>` + opts.join(''));
+    }
+    sectionsHtml = s.join('');
+
+  } else if (state.productType === 'sauna') {
+    const bd = calcSaunaBreakdown(); if (!bd) return false;
+    label = `megurino サウナ — ${bd.mat.name}`;
+    heroKey = 'megurino'; headerText = '簡易見積もり — megurino サウナ'; subtotal = bd.total;
+    const s = [];
+    const wallRows = [`<div class="estimate-row"><div class="estimate-row-label">木材壁面（${bd.mat.name}）<span class="estimate-row-detail">${round2(bd.woodArea).toFixed(2)} ㎡</span></div><div class="estimate-row-price">${fmt(bd.woodPrice)}</div></div>`];
+    if (bd.fixGlassArea > 0) wallRows.push(`<div class="estimate-row"><div class="estimate-row-label">FIXガラス<span class="estimate-row-detail">${round2(bd.fixGlassArea).toFixed(2)} ㎡</span></div><div class="estimate-row-price">${fmt(bd.fixGlassPrice)}</div></div>`);
+    if (bd.doorCount > 0) wallRows.push(`<div class="estimate-row"><div class="estimate-row-label">ガラス扉<span class="estimate-row-detail">${bd.doorCount}枚</span></div><div class="estimate-row-price">${fmt(bd.doorPrice)}</div></div>`);
+    s.push(`<div class="estimate-section-title">本体（壁面）</div>` + wallRows.join(''));
+    if (bd.tileDetails.length) s.push(`<div class="estimate-section-title">壁面タイル</div>` + bd.tileDetails.map(t => `<div class="estimate-row"><div class="estimate-row-label">${t.name}<span class="estimate-row-detail">${round2(t.area).toFixed(2)} ㎡</span></div><div class="estimate-row-price">${fmt(t.price)}</div></div>`).join(''));
+    const benchRows = [];
+    if (bd.benchLen > 0) benchRows.push(`<div class="estimate-row"><div class="estimate-row-label">ベンチ（${bd.mat.name}）<span class="estimate-row-detail">${bd.benchLen} m</span></div><div class="estimate-row-price">${fmt(bd.benchPrice)}</div></div>`);
+    if (bd.backrestLen > 0) benchRows.push(`<div class="estimate-row"><div class="estimate-row-label">背もたれ（${bd.mat.name}）<span class="estimate-row-detail">${bd.backrestLen} m</span></div><div class="estimate-row-price">${fmt(bd.backrestPrice)}</div></div>`);
+    if (bd.hinokiLen > 0) benchRows.push(`<div class="estimate-row"><div class="estimate-row-label">megurino 桧ベンチ<span class="estimate-row-detail">${bd.hinokiLen} m</span></div><div class="estimate-row-price">${fmt(bd.hinokiPrice)}</div></div>`);
+    if (benchRows.length) s.push(`<div class="estimate-section-title">ベンチ・背もたれ</div>` + benchRows.join(''));
+    if (bd.roofArea > 0) s.push(`<div class="estimate-section-title">屋外防水屋根</div><div class="estimate-row"><div class="estimate-row-label">屋外用防水屋根<span class="estimate-row-detail">${round2(bd.roofArea).toFixed(2)} ㎡</span></div><div class="estimate-row-price">${fmt(bd.roofPrice)}</div></div>`);
+    if (bd.stovePrice > 0) s.push(`<div class="estimate-section-title">ストーブ</div><div class="estimate-row"><div class="estimate-row-label">${SAU_STOVES[state.sau.stoveIdx].name}</div><div class="estimate-row-price">${fmt(bd.stovePrice)}</div></div>`);
+    const funcRows = FUNC_OPTIONS.filter((_, i) => state.sau.funcOptions[i]).map(f => `<div class="estimate-row"><div class="estimate-row-label">${f.name}</div><div class="estimate-row-price">${fmt(f.price)}</div></div>`);
+    if (funcRows.length) s.push(`<div class="estimate-section-title">機能オプション</div>` + funcRows.join(''));
+    const accRows = SAU_ACCESSORIES.filter((_, i) => state.sau.accessories[i]).map(a => `<div class="estimate-row"><div class="estimate-row-label">${a.name}</div><div class="estimate-row-price">${fmt(a.price)}</div></div>`);
+    if (accRows.length) s.push(`<div class="estimate-section-title">オプションパーツ</div>` + accRows.join(''));
+    sectionsHtml = s.join('');
+
+  } else if (state.productType === 'logs') {
+    const bd = calcLogsBreakdown(); if (!bd) return false;
+    label = `LOGS SAUNA — ${bd.barrel.sizeLabel} ${bd.barrel.material}`;
+    heroKey = 'logs'; headerText = '簡易見積もり — LOGS SAUNA バレルサウナ'; subtotal = bd.total;
+    const s = [];
+    s.push(`<div class="estimate-section-title">本体</div><div class="estimate-row"><div class="estimate-row-label">バレル（${bd.barrel.sizeLabel} / ${bd.barrel.material}）</div><div class="estimate-row-price">${fmt(bd.barrelPrice)}</div></div>`);
+    if (bd.frontPrice > 0) s.push(`<div class="estimate-section-title">本体オプション（正面）</div><div class="estimate-row"><div class="estimate-row-label">${bd.frontName}</div><div class="estimate-row-price">${fmt(bd.frontPrice)}</div></div>`);
+    if (bd.roofPrice > 0) s.push(`<div class="estimate-section-title">防水屋根</div><div class="estimate-row"><div class="estimate-row-label">防水屋根</div><div class="estimate-row-price">${fmt(bd.roofPrice)}</div></div>`);
+    if (bd.stovePrice > 0) s.push(`<div class="estimate-section-title">ストーブ</div><div class="estimate-row"><div class="estimate-row-label">${LOGS_STOVES[state.logs.stoveIdx].name}</div><div class="estimate-row-price">${fmt(bd.stovePrice)}</div></div>`);
+    const accRows = LOGS_ACCESSORIES.filter((_, i) => state.logs.accessories[i]).map(a => `<div class="estimate-row"><div class="estimate-row-label">${a.name}</div><div class="estimate-row-price">${fmt(a.price)}</div></div>`);
+    if (accRows.length) s.push(`<div class="estimate-section-title">アクセサリー</div>` + accRows.join(''));
+    sectionsHtml = s.join('');
+
+  } else if (state.productType === 'mera') {
+    const bd = calcMeraBreakdown(); if (!bd) return false;
+    label = `mera — ${bd.series.name} ${bd.model.name}`;
+    heroKey = 'mera'; headerText = '簡易見積もり — mera ガス暖炉'; subtotal = bd.total;
+    const s = [];
+    s.push(`<div class="estimate-section-title">本体</div><div class="estimate-row"><div class="estimate-row-label">${bd.series.name} ${bd.model.name}（${bd.model.size}）</div><div class="estimate-row-price">${fmt(bd.basePrice)}</div></div>`);
+    const coverRows = [];
+    if (bd.windCoverPrice) coverRows.push(`<div class="estimate-row"><div class="estimate-row-label">ウインドカバー</div><div class="estimate-row-price">${fmt(bd.windCoverPrice)}</div></div>`);
+    if (bd.stainlessCoverPrice) coverRows.push(`<div class="estimate-row"><div class="estimate-row-label">ステンレスカバー</div><div class="estimate-row-price">${fmt(bd.stainlessCoverPrice)}</div></div>`);
+    if (coverRows.length) s.push(`<div class="estimate-section-title">オプション</div>` + coverRows.join(''));
+    sectionsHtml = s.join('');
+
+  } else { return false; }
+
+  const rate = getDiscountRate();
+  const pct  = rate === 0 ? 0 : state.discount.type === 'custom' ? parseFloat(state.discount.custom) : parseInt(state.discount.type);
+  const discAmt = Math.round(subtotal * rate);
+  const total   = subtotal - discAmt;
+  state.savedEstimates.push({ label, heroKey, headerText, sectionsHtml, subtotal, discountPct: pct, discountAmt: discAmt, total });
+  return true;
+}
+
+function renderSavedEstimatesSummary() {
+  if (!state.savedEstimates.length) return '';
+  const SMALL_LOGO = 'max-height:80px;object-fit:contain;';
+  return state.savedEstimates.map((e, i) => {
+    const discHtml = e.discountPct > 0
+      ? `<div class="estimate-row" style="border-top:1px solid #E8E8E8">
+           <div class="estimate-row-label">小計</div>
+           <div class="estimate-row-price">${fmt(e.subtotal)}</div>
+         </div>
+         <div class="estimate-row">
+           <div class="estimate-row-label" style="color:#CC4444">値引き（${e.discountPct}%）</div>
+           <div class="estimate-row-price" style="color:#CC4444">-${fmt(e.discountAmt)}</div>
+         </div>
+         <div class="estimate-total-row">
+           <div>合計（税抜）</div>
+           <div class="estimate-total-price">${fmt(e.total)}</div>
+         </div>`
+      : `<div class="estimate-total-row">
+           <div>合計（税抜）</div>
+           <div class="estimate-total-price">${fmt(e.total)}</div>
+         </div>`;
+    return `<div class="estimate-wrap">
+      ${heroImg(e.heroKey, 'estimate-hero-img', SMALL_LOGO)}
+      <div class="estimate-header">${e.headerText}</div>
+      <div class="estimate-section">
+        ${e.sectionsHtml}
+        ${discHtml}
+        <div style="text-align:right;margin-top:8px">
+          <button class="btn-remove-est btn btn-secondary" data-idx="${i}" style="font-size:0.8em;padding:4px 12px;">✕ この製品を削除</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderGrandTotal(currentTotal) {
+  if (!state.savedEstimates.length) return '';
+  const grand = state.savedEstimates.reduce((s, e) => s + e.total, 0) + currentTotal;
+  return `<div class="estimate-total-row" style="border-top:2px solid #333;margin-top:12px">
+    <div style="font-weight:700">総合計（税抜）</div>
+    <div class="estimate-total-price">${fmt(grand)}</div>
+  </div>`;
 }
 
 function renderDiscountRows(subtotal) {
@@ -1388,15 +1512,20 @@ function renderEstimateJacuzzi() {
     if (opts.length) sections.push(`<div class="estimate-section-title">オプション</div>` + opts.join(''));
   }
 
+  const rate_jac = getDiscountRate();
+  const disc_jac = Math.round(bd.total * rate_jac);
+  const total_jac = bd.total - disc_jac;
   return `
     <div class="step-title">見積もり結果</div>
     <div class="step-sub">blanc（ブラン）ジャグジー</div>
+    ${renderSavedEstimatesSummary()}
     <div class="estimate-wrap">
-      ${heroImg('blanc', 'estimate-hero-img')}
+      ${heroImg('blanc', 'estimate-hero-img', state.savedEstimates.length > 0 ? 'max-height:80px;object-fit:contain;' : '')}
       <div class="estimate-header">簡易見積もり — blanc ジャグジー</div>
       <div class="estimate-section">
         ${sections.join('')}
         ${renderDiscountRows(bd.total)}
+        ${renderGrandTotal(total_jac)}
         <div class="estimate-note">※ 設置・配送費は別途お見積もりとなります。<br>※ 本見積もりは参考価格です。正式な金額は別途ご確認ください。</div>
       </div>
     </div>
@@ -1445,15 +1574,20 @@ function renderEstimateSauna() {
     `<div class="estimate-row"><div class="estimate-row-label">${a.name}</div><div class="estimate-row-price">${fmt(a.price)}</div></div>`);
   if (accRows.length) sections.push(`<div class="estimate-section-title">オプションパーツ</div>` + accRows.join(''));
 
+  const rate_sau = getDiscountRate();
+  const disc_sau = Math.round(bd.total * rate_sau);
+  const total_sau = bd.total - disc_sau;
   return `
     <div class="step-title">見積もり結果</div>
     <div class="step-sub">megurino（メグリノ）サウナ</div>
+    ${renderSavedEstimatesSummary()}
     <div class="estimate-wrap">
-      ${heroImg('megurino', 'estimate-hero-img')}
+      ${heroImg('megurino', 'estimate-hero-img', state.savedEstimates.length > 0 ? 'max-height:80px;object-fit:contain;' : '')}
       <div class="estimate-header">簡易見積もり — megurino サウナ</div>
       <div class="estimate-section">
         ${sections.join('')}
         ${renderDiscountRows(bd.total)}
+        ${renderGrandTotal(total_sau)}
         <div class="estimate-note">※ 設置・配送費は別途お見積もりとなります。<br>※ 本見積もりは参考価格です。正式な金額は別途ご確認ください。</div>
       </div>
     </div>
@@ -1485,16 +1619,20 @@ function renderEstimateLogs() {
     `<div class="estimate-row"><div class="estimate-row-label">${a.name}</div><div class="estimate-row-price">${fmt(a.price)}</div></div>`);
   if (accRows.length) sections.push(`<div class="estimate-section-title">アクセサリー</div>` + accRows.join(''));
 
-  const logsImgKey = ['logs_1500', 'logs_1800', 'logs_2400'][state.logs.sizeIdx] || 'logs';
+  const rate_logs = getDiscountRate();
+  const disc_logs = Math.round(bd.total * rate_logs);
+  const total_logs = bd.total - disc_logs;
   return `
     <div class="step-title">見積もり結果</div>
     <div class="step-sub">LOGS SAUNA バレルサウナ</div>
+    ${renderSavedEstimatesSummary()}
     <div class="estimate-wrap">
-      ${heroImg('logs', 'estimate-hero-img')}
+      ${heroImg('logs', 'estimate-hero-img', state.savedEstimates.length > 0 ? 'max-height:80px;object-fit:contain;' : '')}
       <div class="estimate-header">簡易見積もり — LOGS SAUNA バレルサウナ</div>
       <div class="estimate-section">
         ${sections.join('')}
         ${renderDiscountRows(bd.total)}
+        ${renderGrandTotal(total_logs)}
         <div class="estimate-note">※ 設置・配送費は別途お見積もりとなります。<br>※ 本見積もりは参考価格です。正式な金額は別途ご確認ください。</div>
       </div>
     </div>
@@ -1518,15 +1656,20 @@ function renderEstimateMera() {
   if (bd.stainlessCoverPrice) coverRows.push(`<div class="estimate-row"><div class="estimate-row-label">ステンレスカバー</div><div class="estimate-row-price">${fmt(bd.stainlessCoverPrice)}</div></div>`);
   if (coverRows.length) sections.push(`<div class="estimate-section-title">オプション</div>` + coverRows.join(''));
 
+  const rate_mera = getDiscountRate();
+  const disc_mera = Math.round(bd.total * rate_mera);
+  const total_mera = bd.total - disc_mera;
   return `
     <div class="step-title">見積もり結果</div>
     <div class="step-sub">mera（メラ）ガス暖炉</div>
+    ${renderSavedEstimatesSummary()}
     <div class="estimate-wrap">
-      ${heroImg('mera', 'estimate-hero-img')}
+      ${heroImg('mera', 'estimate-hero-img', state.savedEstimates.length > 0 ? 'max-height:80px;object-fit:contain;' : '')}
       <div class="estimate-header">簡易見積もり — mera ガス暖炉</div>
       <div class="estimate-section">
         ${sections.join('')}
         ${renderDiscountRows(bd.total)}
+        ${renderGrandTotal(total_mera)}
         <div class="estimate-note">※ 設置・配送費は別途お見積もりとなります。<br>※ 本見積もりは参考価格です。正式な金額は別途ご確認ください。</div>
       </div>
     </div>
@@ -1651,6 +1794,40 @@ function attachEvents() {
   // Restart
   const btnRestart = document.getElementById('btn-restart');
   if (btnRestart) btnRestart.addEventListener('click', () => { resetState(); render(); });
+
+  // 別製品を追加
+  const btnAddProduct = document.getElementById('btn-add-product');
+  if (btnAddProduct) btnAddProduct.addEventListener('click', () => {
+    if (!saveCurrentEstimate()) return;
+    // 製品選択のみリセット（savedEstimatesは保持）
+    state.productType = null;
+    state.stepIndex   = 0;
+    state.error       = '';
+    state.jac = { seriesIdx: null, modelIdx: null, sizeIdx: null, faucetType: null, faucetIdx: null, bubble: false, led: false };
+    state.sau = {
+      w: '', d: '', h: '', material: null,
+      glassPlacement: 'none', noneGlassDoor: null,
+      frontGlass: { fix: false, door: false }, sideGlass: { fix: false, door: false },
+      tileFront: false, tileBack: false, tileSideA: false, tileSideB: false,
+      benchType: null, benchLength: '', hinokiLength: '', backrestLength: '',
+      roofEnabled: false, stoveIdx: null,
+      funcOptions: FUNC_OPTIONS.map(() => false),
+      accessories: SAU_ACCESSORIES.map(() => false),
+    };
+    state.logs = { sizeIdx: null, barrelIdx: null, frontIdx: null, roofEnabled: false, stoveIdx: null, accessories: LOGS_ACCESSORIES.map(() => false) };
+    state.mera = { seriesIdx: null, modelIdx: null, windCover: false, stainlessCover: false };
+    state.discount = { type: null, custom: '' };
+    render();
+  });
+
+  // 追加済み製品の削除
+  document.querySelectorAll('.btn-remove-est').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      state.savedEstimates.splice(parseInt(btn.dataset.idx), 1);
+      render();
+    });
+  });
 
   // ---- Jacuzzi ----
   if (stepId === 'jac_series') {
@@ -2025,6 +2202,7 @@ function resetState() {
   };
   state.mera = { seriesIdx: null, modelIdx: null, windCover: false, stainlessCover: false };
   state.discount = { type: null, custom: '' };
+  state.savedEstimates = [];
 }
 
 // ============================================================
