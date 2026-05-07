@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1a56a0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="展示会ヒアリング">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<title>展示会ヒアリング</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F4F4F4;--surface:#fff;--surface2:#F8F8F8;--border:#E2E2E2;
+  --text:#2D2D2D;--text2:#888;--text3:#AAAAAA;
+  --accent:#2D2D2D;--accent-light:#F4F4F4;--accent-text:#1A1A1A;
+  --green:#388E3C;--green-light:#E8F5E9;
+  --amber:#8a5c00;--amber-light:#FFF8E1;
+  --red:#C62828;--red-light:#FDECEC;
+  --hot:#C62828;--hot-bg:#FDECEC;
+  --warm:#8a5c00;--warm-bg:#FFF8E1;
+  --cold:#2D2D2D;--cold-bg:#F4F4F4;
+  --radius:4px;--radius-sm:3px;--shadow:0 1px 3px rgba(0,0,0,.04);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+}
+html,body{height:100%;overflow-x:hidden;}
+body{font-family:'Hiragino Kaku Gothic Pro','Meiryo','Yu Gothic',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.6;letter-spacing:0.02em;}
+.app-header{background:#fff;border-bottom:1px solid #E2E2E2;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0;}
+.app-header-home{text-decoration:none;color:#888;font-size:11px;letter-spacing:0.06em;display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border:1px solid #E2E2E2;border-radius:3px;background:#fff;flex-shrink:0;}
+.app-header-home:hover{color:#2D2D2D;border-color:#2D2D2D;}
+.app-header-logo{font-size:15px;font-weight:700;letter-spacing:0.08em;color:#1A1A1A;flex:1;}
+.app-header-img{height:28px;width:auto;display:block;flex-shrink:0;}
+.app-wrapper{display:flex;flex-direction:column;height:100dvh;}
+.tab-bar{display:flex;background:var(--surface);border-top:1px solid var(--border);padding-bottom:var(--safe-bottom);flex-shrink:0;position:sticky;bottom:0;z-index:100;}
+.tab-btn{flex:1;padding:10px 4px 8px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;border:none;background:transparent;font-family:inherit;color:var(--text3);font-size:10px;font-weight:500;}
+.tab-btn.active{color:var(--accent);}
+.tab-btn svg{width:20px;height:20px;}
+.tab-content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.page{display:none;padding:14px 12px 20px;}
+.page.active{display:block;}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:14px;box-shadow:var(--shadow);}
+.topbar-title{font-size:15px;font-weight:700;}
+.topbar-sub{font-size:11px;color:var(--text3);margin-top:1px;}
+.topbar-num{font-size:22px;font-weight:700;color:var(--accent);}
+.topbar-label{font-size:10px;color:var(--text3);}
+.section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;box-shadow:var(--shadow);overflow:hidden;}
+.sh{padding:10px 14px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:11px;font-weight:700;color:var(--text2);letter-spacing:.04em;display:flex;align-items:center;gap:6px;}
+.sb{padding:12px 14px;display:flex;flex-direction:column;gap:10px;}
+.field{display:flex;flex-direction:column;gap:4px;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.lbl{font-size:11px;font-weight:700;color:var(--text2);}
+.req{color:var(--red);margin-left:2px;}
+input[type=text],input[type=email],input[type=tel],textarea{width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:14px;color:var(--text);background:var(--bg);-webkit-appearance:none;transition:border-color .15s,background .15s;}
+input:focus,textarea:focus{outline:none;border-color:var(--accent);background:#fff;}
+textarea{resize:none;min-height:64px;}
+.ai-filled{border-color:#5DCAA5!important;background:#f0fbf7!important;}
+.stars{display:flex;gap:5px;align-items:center;}
+.star-btn{width:32px;height:32px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;-webkit-tap-highlight-color:transparent;}
+.star-btn.on{background:var(--amber-light);border-color:#EF9F27;}
+.star-count{font-size:12px;color:var(--text2);margin-left:4px;}
+.priority-row{display:flex;gap:6px;}
+.pri-btn{flex:1;padding:10px 4px;border-radius:var(--radius-sm);border:1px solid var(--border);font-size:13px;font-weight:700;text-align:center;cursor:pointer;background:var(--bg);color:var(--text2);-webkit-tap-highlight-color:transparent;}
+.pri-btn.hot.sel{background:var(--hot-bg);border-color:var(--hot);color:var(--hot);}
+.pri-btn.warm.sel{background:var(--warm-bg);border-color:var(--warm);color:var(--warm);}
+.pri-btn.cold.sel{background:var(--cold-bg);border-color:var(--cold);color:var(--cold);}
+/* scan */
+.scan-area{position:relative;background:#1c1c1e;border-radius:var(--radius);overflow:hidden;min-height:170px;display:flex;align-items:center;justify-content:center;}
+.scan-guide{text-align:center;color:rgba(255,255,255,.55);font-size:12px;padding:20px;}
+.scan-guide-icon{font-size:36px;margin-bottom:8px;opacity:.5;}
+.scan-preview{width:100%;max-height:170px;object-fit:contain;display:none;}
+.scan-frame{position:absolute;inset:14px;border:1.5px solid rgba(255,255,255,.3);border-radius:8px;pointer-events:none;}
+.sc{position:absolute;width:14px;height:14px;}
+.sc-tl{top:-1px;left:-1px;border-top:2.5px solid #5DCAA5;border-left:2.5px solid #5DCAA5;border-radius:3px 0 0 0;}
+.sc-tr{top:-1px;right:-1px;border-top:2.5px solid #5DCAA5;border-right:2.5px solid #5DCAA5;border-radius:0 3px 0 0;}
+.sc-bl{bottom:-1px;left:-1px;border-bottom:2.5px solid #5DCAA5;border-left:2.5px solid #5DCAA5;border-radius:0 0 0 3px;}
+.sc-br{bottom:-1px;right:-1px;border-bottom:2.5px solid #5DCAA5;border-right:2.5px solid #5DCAA5;border-radius:0 0 3px 0;}
+.scan-btns{display:flex;gap:8px;margin-top:8px;}
+.btn{padding:11px;border-radius:var(--radius-sm);border:none;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;-webkit-tap-highlight-color:transparent;}
+.btn-p{background:var(--accent);color:#fff;flex:1;}
+.btn-s{background:var(--surface2);color:var(--text);border:1px solid var(--border);flex:1;}
+/* claude panel */
+.claude-panel{border:1.5px solid #85B7EB;border-radius:var(--radius);overflow:hidden;display:none;}
+.claude-panel.show{display:block;}
+.cp-head{background:var(--accent-light);padding:10px 14px;display:flex;align-items:center;gap:8px;}
+.cp-title{font-size:13px;font-weight:700;color:var(--accent-text);}
+.cp-body{padding:12px 14px;display:flex;flex-direction:column;gap:10px;}
+.step-row{display:flex;gap:10px;align-items:flex-start;}
+.step-num{width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.step-text{font-size:12px;color:var(--text2);line-height:1.6;flex:1;}
+.step-text strong{color:var(--text);font-weight:700;}
+.copy-btn{width:100%;padding:10px;border-radius:var(--radius-sm);border:1.5px dashed #85B7EB;background:var(--accent-light);color:var(--accent-text);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;}
+.open-btn{width:100%;padding:11px;border-radius:var(--radius-sm);border:none;background:var(--accent);color:#fff;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;}
+.paste-area{width:100%;padding:9px 10px;border:1.5px dashed var(--border);border-radius:var(--radius-sm);font-family:'Courier New',monospace;font-size:12px;color:var(--text2);background:var(--bg);min-height:72px;resize:none;}
+.paste-area:focus{outline:none;border-color:var(--accent);border-style:solid;}
+.parse-btn{width:100%;padding:11px;border-radius:var(--radius-sm);border:none;background:var(--green-light);color:var(--green);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;}
+.status-bar{padding:8px 10px;border-radius:var(--radius-sm);font-size:12px;display:none;align-items:center;gap:6px;}
+.status-bar.ok{background:var(--green-light);color:var(--green);display:flex;}
+.status-bar.err{background:var(--red-light);color:var(--red);display:flex;}
+/* submit */
+.submit-area{display:flex;gap:8px;margin-top:4px;}
+.btn-clear{flex:1;padding:13px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg);color:var(--text2);font-family:inherit;font-size:14px;cursor:pointer;font-weight:500;}
+.btn-submit{flex:2;padding:13px;border-radius:var(--radius-sm);border:none;background:var(--accent);color:#fff;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;}
+/* list */
+.badge{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;}
+.badge-blue{background:var(--accent-light);color:var(--accent-text);}
+.badge-red{background:var(--hot-bg);color:var(--hot);}
+.badge-amber{background:var(--amber-light);color:var(--amber);}
+.badge-green{background:var(--green-light);color:var(--green);}
+.badge-gray{background:var(--surface2);color:var(--text2);}
+.lead-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:8px;box-shadow:var(--shadow);}
+.lc-head{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+.avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
+.lead-name{font-size:14px;font-weight:700;}
+.lead-co{font-size:12px;color:var(--text2);}
+.lead-meta{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+.pri-dot{width:8px;height:8px;border-radius:50%;}
+.lead-time{font-size:11px;color:var(--text3);}
+/* export */
+.btn-export{width:100%;padding:12px;border-radius:var(--radius-sm);border:1px solid var(--accent);background:var(--accent-light);color:var(--accent-text);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;}
+.btn-danger{border-color:var(--red)!important;background:var(--red-light)!important;color:var(--red)!important;}
+/* install banner */
+.install-banner{background:var(--accent-light);border:1px solid #85B7EB;border-radius:var(--radius);padding:12px 14px;margin-bottom:14px;display:none;}
+.install-banner.show{display:block;}
+/* toast */
+.toast{position:fixed;bottom:calc(64px + var(--safe-bottom) + 12px);left:50%;transform:translateX(-50%) translateY(20px);background:#1a1917;color:#fff;padding:10px 20px;border-radius:30px;font-size:13px;font-weight:500;opacity:0;transition:all .3s;z-index:999;white-space:nowrap;pointer-events:none;}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+#file-input,#camera-input{display:none;}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="app-wrapper">
+<div class="app-header">
+  <a href="../" class="app-header-home">← ホーム</a>
+  <div class="app-header-logo">展示会ヒアリング</div>
+  <a href="../" style="display:block;line-height:0;"><img class="app-header-img" src="../estimate/images/sense_logo.jpg.png.png?v=3" alt="SENSE Product Company — ホームへ" onerror="this.src='../estimate/images/sense_logo.jpg.png?v=3';this.onerror=function(){this.style.display='none';}"></a>
+</div>
+<div class="tab-content">
+
+  <!-- ページ1: 入力 -->
+  <div class="page active" id="page-form">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title" style="font-size:13px;letter-spacing:0.04em;color:#888;font-weight:500;" id="date-label"></div>
+      </div>
+      <div style="text-align:right;">
+        <div class="topbar-num" id="count-num">0</div>
+        <div class="topbar-label">件登録済み</div>
+      </div>
+    </div>
+
+    <div class="install-banner" id="install-banner">
+      <div style="font-size:13px;font-weight:700;color:var(--accent-text);margin-bottom:4px;">📱 ホーム画面に追加できます</div>
+      <div style="font-size:12px;color:var(--accent-text);">Safari「共有」ボタン →「ホーム画面に追加」</div>
+    </div>
+
+    <!-- 名刺スキャン -->
+    <div class="section">
+      <div class="sh">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="11" height="7" rx="1.5"/><circle cx="6.5" cy="6.5" r="2"/></svg>
+        名刺スキャン（追加料金ゼロ）
+      </div>
+      <div class="sb">
+        <div class="scan-area" id="scan-area">
+          <div class="scan-frame">
+            <div class="sc sc-tl"></div><div class="sc sc-tr"></div>
+            <div class="sc sc-bl"></div><div class="sc sc-br"></div>
+          </div>
+          <div class="scan-guide" id="scan-guide">
+            <div class="scan-guide-icon">📷</div>
+            <div>名刺を撮影または画像を選択</div>
+          </div>
+          <img id="scan-preview" class="scan-preview" alt="名刺プレビュー">
+        </div>
+        <div class="scan-btns">
+          <button class="btn btn-p" onclick="document.getElementById('camera-input').click()">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="12" height="8" rx="1.5"/><circle cx="7" cy="7" r="2"/><path d="M5 3l1-2h2l1 2"/></svg>撮影する
+          </button>
+          <button class="btn btn-s" onclick="document.getElementById('file-input').click()">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 1v8M4 4l3-3 3 3M2 10v2a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-2"/></svg>画像を選ぶ
+          </button>
+        </div>
+
+        <!-- OCRボタン（撮影後に表示） -->
+        <button class="btn btn-p" id="ocr-btn" style="display:none;width:100%;margin-top:8px;background:var(--green);" onclick="runOCR()">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="6"/><path d="M5 7l1.5 1.5L9 6"/></svg>
+          OCRで自動読み取り（無料）
+        </button>
+        <div class="status-bar" id="ocr-status"></div>
+
+        <details id="claude-fallback" style="display:none;margin-top:6px;">
+          <summary style="font-size:11px;color:var(--text3);cursor:pointer;padding:4px 0;">OCRで読み取れない場合：claude.aiで手動読み取り</summary>
+        </details>
+
+        <!-- claude.ai連携パネル（撮影後に表示） -->
+        <div class="claude-panel" id="claude-panel">
+          <div class="cp-head">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="var(--accent-text)" stroke-width="1.5"><circle cx="7" cy="7" r="6"/><path d="M5 7l2 2 3-3"/></svg>
+            <span class="cp-title">claude.aiで無料読み取り（3ステップ）</span>
+          </div>
+          <div class="cp-body">
+            <div class="step-row">
+              <div class="step-num">1</div>
+              <div class="step-text"><strong>プロンプトをコピー</strong>してください</div>
+            </div>
+            <button class="copy-btn" id="copy-btn" onclick="copyPrompt()">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="4" width="8" height="8" rx="1.5"/><path d="M4 4V2.5A1.5 1.5 0 0 1 5.5 1h5A1.5 1.5 0 0 1 12 2.5v5A1.5 1.5 0 0 1 10.5 9H9"/></svg>
+              プロンプトをコピー
+            </button>
+
+            <div class="step-row">
+              <div class="step-num">2</div>
+              <div class="step-text"><strong>claude.aiを開き</strong>、名刺画像を貼り付け＋プロンプトを送信</div>
+            </div>
+            <button class="open-btn" onclick="window.open('https://claude.ai','_blank')">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2H2a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1V8M8 1h5v5M5 9L13 1"/></svg>
+              claude.aiを開く（別タブ）
+            </button>
+
+            <div class="step-row">
+              <div class="step-num">3</div>
+              <div class="step-text">Claudeの返答（JSON）を<strong>下に貼り付け</strong>て「自動入力」</div>
+            </div>
+            <textarea class="paste-area" id="paste-area" placeholder='{"company":"...","name":"...","title":"...","email":"...","phone":"..."}' rows="3"></textarea>
+            <button class="parse-btn" onclick="parseAndFill()">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 7l4 4 6-6"/></svg>
+              フォームに自動入力する
+            </button>
+            <div class="status-bar" id="parse-status"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 基本情報 -->
+    <div class="section">
+      <div class="sh">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6.5" cy="4" r="2.5"/><path d="M1 12c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/></svg>基本情報
+      </div>
+      <div class="sb">
+        <div class="field">
+          <label class="lbl">会社名・施設名<span class="req">*</span></label>
+          <input type="text" id="company" placeholder="例：グランドホテル東京">
+        </div>
+        <div class="field">
+          <label class="lbl">住所</label>
+          <input type="text" id="address" placeholder="例：〒100-0001 東京都千代田区...">
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label class="lbl">担当者名<span class="req">*</span></label>
+            <input type="text" id="name" placeholder="姓 名">
+          </div>
+          <div class="field">
+            <label class="lbl">役職</label>
+            <input type="text" id="title" placeholder="例：施設長">
+          </div>
+        </div>
+        <div class="field">
+          <label class="lbl">メールアドレス</label>
+          <input type="email" id="email" placeholder="example@hotel.co.jp">
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label class="lbl">電話番号（固定）</label>
+            <input type="tel" id="phone" placeholder="03-XXXX-XXXX">
+          </div>
+          <div class="field">
+            <label class="lbl">携帯電話</label>
+            <input type="tel" id="mobile" placeholder="090-XXXX-XXXX">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ヒアリング結果 -->
+    <div class="section">
+      <div class="sh">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 10V4a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H4l-3 2z"/></svg>ヒアリング結果
+      </div>
+      <div class="sb">
+        <div class="field">
+          <label class="lbl">業種</label>
+          <input type="text" id="industry" placeholder="例：宿泊施設、小売">
+        </div>
+        <div class="field">
+          <label class="lbl">興味・関心度</label>
+          <div class="stars">
+            <button class="star-btn" data-val="1" onclick="setStar(1)">★</button>
+            <button class="star-btn" data-val="2" onclick="setStar(2)">★</button>
+            <button class="star-btn" data-val="3" onclick="setStar(3)">★</button>
+            <button class="star-btn" data-val="4" onclick="setStar(4)">★</button>
+            <button class="star-btn" data-val="5" onclick="setStar(5)">★</button>
+            <span class="star-count" id="star-count">未評価</span>
+          </div>
+        </div>
+<div class="field">
+          <label class="lbl">課題・メモ</label>
+          <textarea id="memo" placeholder="聞いた課題、要望、特記事項など"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="submit-area">
+      <button class="btn-clear" onclick="clearForm()">クリア</button>
+      <button class="btn-submit" onclick="submitForm()">登録する</button>
+    </div>
+
+    <!-- 登録完了パネル（submit成功後に表示） -->
+    <div class="section" id="post-submit-panel" style="display:none;margin-top:12px;border-color:var(--accent);">
+      <div class="sh" style="background:var(--accent);color:#fff;border-bottom:none;">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 7l3 3 6-6"/></svg>
+        登録が完了しました
+      </div>
+      <div class="sb">
+        <div id="post-submit-summary" style="font-size:12px;color:var(--text2);line-height:1.7;"></div>
+        <div id="post-submit-linked" style="display:none;font-size:11px;color:var(--text2);padding:8px 10px;background:var(--surface2);border-radius:var(--radius-sm);"></div>
+        <button class="btn btn-p" onclick="proceedToEstimate()" style="width:100%;background:var(--accent);">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 7h8M7 3l4 4-4 4"/></svg>
+          この内容で見積もりに進む
+        </button>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-s" onclick="goToList()" style="flex:1;">リストを見る</button>
+          <button class="btn btn-s" onclick="resetAfterSubmit()" style="flex:1;">次の来場者</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 連携バナー（from_estimate時に表示） -->
+    <div class="section" id="from-estimate-banner" style="display:none;border-color:var(--accent);margin-bottom:12px;">
+      <div class="sb" style="background:var(--surface2);">
+        <div style="font-size:12px;color:var(--text);line-height:1.7;">
+          <strong>見積もりから連携されました</strong><br>
+          <span id="from-estimate-summary" style="color:var(--text2);font-size:11px;"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ページ2: リスト -->
+  <div class="page" id="page-list">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <span style="font-size:15px;font-weight:700;">登録リスト</span>
+      <span class="badge badge-blue" id="list-count-badge">0件</span>
+    </div>
+<div id="lead-list"></div>
+  </div>
+
+  <!-- ページ3: 設定 -->
+  <div class="page" id="page-settings">
+    <div class="topbar" style="margin-bottom:14px;">
+      <div><div class="topbar-title">設定</div><div class="topbar-sub">エクスポート・使い方</div></div>
+    </div>
+
+    <div class="section">
+      <div class="sh"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4h9v7H2zM4 7h5M4 9h3"/></svg>Googleスプレッドシート連携（任意）</div>
+      <div class="sb">
+        <div style="font-size:12px;color:var(--text2);line-height:1.7;">
+          登録時に自動でスプレッドシートへ書き込みます。設定すると複数端末・チームでデータ共有可能。<br>
+          <strong>初期設定（1回のみ）</strong>:<br>
+          ① Googleスプレッドシートを新規作成<br>
+          ② メニュー「拡張機能」→「Apps Script」<br>
+          ③ 下記コードを貼り付け（既存コードは全削除）<br>
+          ④ 「デプロイ」→「新しいデプロイ」→種類「ウェブアプリ」<br>
+          ⑤ 実行するユーザー「自分」、アクセスできるユーザー「全員」 → デプロイ<br>
+          ⑥ 表示された <strong>ウェブアプリのURL</strong> を下に貼り付け
+        </div>
+        <details style="font-size:12px;color:var(--text2);">
+          <summary style="cursor:pointer;padding:6px 0;font-weight:700;">▾ Apps Script コード（コピー用）</summary>
+          <button class="btn btn-s" onclick="copyGasCode()" style="width:100%;margin-bottom:6px;">コードをコピー</button>
+          <textarea readonly id="gas-code" style="width:100%;min-height:140px;font-family:'Courier New',monospace;font-size:11px;padding:8px;border:1px solid var(--border);border-radius:var(--radius-sm);resize:vertical;background:var(--surface2);color:var(--text);">function doPost(e) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  const d = JSON.parse(e.postData.contents);
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(['登録日時','会社名','住所','担当者名','役職','メール','電話','携帯','業種','関心度','メモ','見積もり要約','見積もり合計']);
+  }
+  sheet.appendRow([d.時刻||'',d.会社名||'',d.住所||'',d.担当者名||'',d.役職||'',d.メール||'',d.電話||'',d.携帯||'',d.業種||'',d.関心度||'',d.メモ||'',d.見積もり要約||'',d.見積もり合計||'']);
+  return ContentService.createTextOutput(JSON.stringify({ok:true})).setMimeType(ContentService.MimeType.JSON);
+}</textarea>
+        </details>
+        <div class="field">
+          <label class="lbl">ウェブアプリのURL</label>
+          <input type="text" id="sheet-url-input" placeholder="https://script.google.com/macros/s/.../exec" autocomplete="off" autocorrect="off" spellcheck="false">
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-p" onclick="saveSheetUrl()" style="flex:1;">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 7l4 4 6-6"/></svg>
+            保存
+          </button>
+          <button class="btn btn-s" onclick="testSheetWebhook()" style="flex:1;">送信テスト</button>
+        </div>
+        <div class="status-bar" id="sheet-status"></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sh"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6.5" cy="6.5" r="2"/><path d="M6.5 1v1.5M6.5 10V11.5M1 6.5h1.5M10 6.5H11.5"/></svg>OCR.space APIキー（無料）</div>
+      <div class="sb">
+        <div style="font-size:12px;color:var(--text2);line-height:1.7;">
+          OCR読み取りには <strong>OCR.space</strong> の無料APIキーが必要です（月25,000回まで・<strong>クレジットカード不要</strong>）。<br>
+          ① <a href="https://ocr.space/ocrapi/freekey" target="_blank" style="color:var(--accent);">ocr.space/ocrapi/freekey</a> を開く<br>
+          ② メールアドレスを入力 → 受信したキーを下に貼り付け<br>
+          ③ 保存
+        </div>
+        <div class="field">
+          <label class="lbl">APIキー</label>
+          <input type="text" id="ocr-key-input" placeholder="K8XXXXXXXX..." autocomplete="off" autocorrect="off" spellcheck="false">
+        </div>
+        <button class="btn btn-p" onclick="saveOcrKey()" style="width:100%;">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 7l4 4 6-6"/></svg>
+          保存する
+        </button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sh"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 10v2h9v-2M6.5 1v8M4 6l2.5 3L9 6"/></svg>データエクスポート</div>
+      <div class="sb">
+        <div style="font-size:12px;color:var(--text2);">登録データをCSVでダウンロードできます。展示会後にGoogleスプレッドシートへインポートして管理できます。</div>
+        <button class="btn-export" onclick="exportCSV()">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 10v2h9v-2M6.5 1v8M4 6l2.5 3L9 6"/></svg>CSVをダウンロード
+        </button>
+        <button class="btn-export btn-danger" onclick="clearAllData()">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4h10M5 4V2h4v2M11 4l-1 8H4L3 4"/></svg>全データを削除
+        </button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sh"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6.5" cy="6.5" r="5.5"/><path d="M6.5 4v3l2 1.5"/></svg>名刺読み取りの流れ</div>
+      <div class="sb">
+        <div style="font-size:12px;color:var(--text2);line-height:1.9;">
+          <strong>① 名刺を撮影</strong>（またはギャラリーから選択）<br>
+          <strong>② 「プロンプトをコピー」</strong>ボタンを押す<br>
+          <strong>③ 「claude.aiを開く」</strong>で別タブを開く<br>
+          <strong>④ claude.aiに名刺画像＋プロンプトを送信</strong><br>
+          <strong>⑤ 返答のJSONをこのアプリに貼り付け</strong>→ 自動入力<br><br>
+          <span style="color:var(--green);font-weight:700;">✓ APIキー不要・追加料金ゼロ</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sh"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="1" width="9" height="11" rx="1.5"/><path d="M4 4h5M4 7h5M4 10h3"/></svg>ホーム画面への追加</div>
+      <div class="sb">
+        <div style="font-size:12px;color:var(--text2);line-height:1.9;">
+          <strong>iOS（Safari）</strong><br>
+          画面下「共有」ボタン →「ホーム画面に追加」<br><br>
+          <strong>Android（Chrome）</strong><br>
+          右上「⋮」→「ホーム画面に追加」
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /tab-content -->
+
+<div class="tab-bar">
+  <button class="tab-btn active" id="tab-form" onclick="switchTab('form')">
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="14" height="14" rx="2"/><path d="M7 10h6M10 7v6"/></svg>入力
+  </button>
+  <button class="tab-btn" id="tab-list" onclick="switchTab('list')">
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6h12M4 10h12M4 14h8"/></svg>リスト
+  </button>
+  <button class="tab-btn" id="tab-settings" onclick="switchTab('settings')">
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="2.5"/><path d="M10 3v1.5M10 15.5V17M3 10h1.5M15.5 10H17M5.05 5.05l1.06 1.06M13.89 13.89l1.06 1.06M5.05 14.95l1.06-1.06M13.89 6.11l1.06-1.06"/></svg>設定
+  </button>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+<input type="file" id="file-input" accept="image/*" onchange="handleFile(event)">
+<input type="file" id="camera-input" accept="image/*" capture="environment" onchange="handleFile(event)">
+
+<script>
+let starVal=0;
+const d=new Date();
+document.getElementById('date-label').textContent=d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日（'+'日月火水木金土'[d.getDay()]+'）';
+function rec(){try{return JSON.parse(localStorage.getItem('hr')||'[]')}catch{return[]}}
+function saveRec(r){localStorage.setItem('hr',JSON.stringify(r))}
+function refreshCount(){const n=rec().length;document.getElementById('count-num').textContent=n;document.getElementById('list-count-badge').textContent=n+'件';}
+refreshCount();
+if(/iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.navigator.standalone)
+  document.getElementById('install-banner').classList.add('show');
+
+function switchTab(t){
+  ['form','list','settings'].forEach(x=>{
+    document.getElementById('page-'+x).classList.toggle('active',x===t);
+    document.getElementById('tab-'+x).classList.toggle('active',x===t);
+  });
+  if(t==='list')renderList();
+}
+
+let lastImageDataURL=null;
+function handleFile(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    lastImageDataURL=ev.target.result;
+    const p=document.getElementById('scan-preview');
+    p.src=ev.target.result;p.style.display='block';
+    document.getElementById('scan-guide').style.display='none';
+    document.getElementById('ocr-btn').style.display='flex';
+    document.getElementById('claude-fallback').style.display='block';
+    document.getElementById('claude-panel').classList.remove('show');
+    setOS('','');
+  };
+  r.readAsDataURL(f);e.target.value='';
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  const det=document.getElementById('claude-fallback');
+  det?.addEventListener('toggle',()=>{
+    document.getElementById('claude-panel').classList.toggle('show',det.open);
+  });
+});
+
+function setOS(t,m){const el=document.getElementById('ocr-status');el.className='status-bar'+(t?' '+t:'');el.innerHTML=m;}
+
+function getOcrKey(){return localStorage.getItem('ocrspace_key')||'helloworld';}
+
+async function compressImage(dataURL,maxBytes){
+  return new Promise(resolve=>{
+    const img=new Image();
+    img.onload=()=>{
+      let q=0.85,scale=1;
+      const draw=()=>{
+        const w=Math.round(img.naturalWidth*scale),h=Math.round(img.naturalHeight*scale);
+        const c=document.createElement('canvas');c.width=w;c.height=h;
+        c.getContext('2d').drawImage(img,0,0,w,h);
+        return c.toDataURL('image/jpeg',q);
+      };
+      let out=draw();
+      while(out.length*0.75>maxBytes&&(q>0.4||scale>0.4)){
+        if(q>0.45)q-=0.1;else scale*=0.85;
+        out=draw();
+      }
+      resolve(out);
+    };
+    img.src=dataURL;
+  });
+}
+
+async function runOCR(){
+  if(!lastImageDataURL){showToast('画像がありません');return;}
+  const key=getOcrKey();
+  const btn=document.getElementById('ocr-btn');
+  btn.disabled=true;
+  document.getElementById('ocr-status').style.display='flex';
+  setOS('','<span style="width:12px;height:12px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;vertical-align:middle;"></span> 読み取り中...');
+  try{
+    const compressed=await compressImage(lastImageDataURL,950000);
+    const fd=new FormData();
+    fd.append('base64Image',compressed);
+    fd.append('language','jpn');
+    fd.append('OCREngine','2');
+    fd.append('scale','true');
+    fd.append('isTable','false');
+    const res=await fetch('https://api.ocr.space/parse/image',{method:'POST',headers:{apikey:key},body:fd});
+    const json=await res.json();
+    if(json.IsErroredOnProcessing){
+      const msg=Array.isArray(json.ErrorMessage)?json.ErrorMessage.join(' '):json.ErrorMessage||'OCR APIエラー';
+      throw new Error(msg);
+    }
+    const text=json.ParsedResults?.[0]?.ParsedText||'';
+    if(!text.trim())throw new Error('文字が検出できませんでした');
+    const parsed=parseCardText(text);
+    fillFields(parsed);
+    const filled=Object.values(parsed).filter(Boolean).length;
+    if(filled===0){setOS('err','文字は検出しましたが項目を抽出できませんでした。手入力してください');}
+    else{setOS('ok',`✓ ${filled}項目を抽出しました。内容をご確認ください`);}
+  }catch(err){
+    console.error(err);
+    let m='OCRに失敗しました：'+(err.message||'通信エラー');
+    if(/key|apikey|invalid/i.test(err.message||''))m='APIキーが無効です。設定タブで OCR.space の無料キーを入力してください';
+    setOS('err',m);
+  }
+  btn.disabled=false;
+}
+
+function parseCardText(text){
+  const lines=text.split(/\r?\n/).map(s=>s.replace(/\s+/g,' ').trim()).filter(Boolean);
+  const all=lines.join(' ');
+  const out={company:'',address:'',name:'',title:'',email:'',phone:'',mobile:''};
+
+  const em=all.match(/[\w.+-]+@[\w-]+\.[\w.-]+/);
+  if(em)out.email=em[0];
+
+  out.mobile='';
+  const phoneRe=/(?:TEL|MOBILE|MOB|PHONE|携帯|電話)?[:：.]?\s*((?:\+?81[-\s]?|0)\d{1,4}[-－（(\s]?\d{1,4}[-－）)\s]?\d{3,4})/gi;
+  const found=[];let m;
+  while((m=phoneRe.exec(all))!==null){
+    const num=m[1].replace(/[－]/g,'-').replace(/\s+/g,'').replace(/[（(]/g,'-').replace(/[）)]/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'');
+    const digits=num.replace(/\D/g,'').replace(/^81/,'0');
+    if(/^0[789]0\d{8}$/.test(digits))found.push({type:'mobile',num});
+    else if(/^0\d{8,9}$/.test(digits))found.push({type:'phone',num});
+  }
+  for(const f of found){if(f.type==='mobile'&&!out.mobile)out.mobile=f.num;if(f.type==='phone'&&!out.phone)out.phone=f.num;}
+
+  const titleJP=['代表取締役','取締役','社長','副社長','専務','常務','会長','部長','次長','課長','係長','主任','店長','施設長','支配人','室長','本部長','事業部長','チーフ','リーダー','顧問','マネージャー','ディレクター','プロデューサー','エンジニア','デザイナー','プランナー','コンサルタント','アシスタント','スタッフ','講師','医師','薬剤師','看護師','弁護士','税理士','司法書士','建築士','技師'];
+  const titleEN=['CEO','COO','CTO','CFO','CMO','CIO','PRESIDENT','VICE PRESIDENT','VP','DIRECTOR','MANAGER','LEADER','CHIEF','DESIGNER','DESINER','ENGINEER','DEVELOPER','PHOTOGRAPHER','ARTIST','ILLUSTRATOR','WRITER','PRODUCER','PLANNER','CONSULTANT','ANALYST','COORDINATOR','EDITOR','OWNER','FOUNDER','REPRESENTATIVE','ASSISTANT','OFFICER','SPECIALIST','STAFF','HEAD'];
+  for(const ln of lines){
+    if(titleJP.some(k=>ln.includes(k))){out.title=ln;break;}
+    const upper=ln.toUpperCase();
+    if(titleEN.some(k=>upper===k||upper.includes(' '+k)||upper.includes(k+' ')||upper.startsWith(k+'/')||upper.endsWith('/'+k))||(/^[A-Z][A-Z\s.&/-]{2,30}$/.test(ln)&&titleEN.some(k=>upper.includes(k)))){
+      out.title=ln;break;
+    }
+  }
+
+  const companySuffix=/(株式会社|有限会社|合同会社|合資会社|一般社団法人|公益社団法人|学校法人|医療法人|（株）|\(株\)|（有）|\(有\)|Co\.,?\s*Ltd\.?|Inc\.?|Corp\.?|LLC|Ltd\.?|GmbH|S\.A\.)/i;
+  for(const ln of lines){
+    if(companySuffix.test(ln)){out.company=ln;break;}
+  }
+
+  out.address='';
+  const addrRe=/(〒?\s*\d{3}[-－]?\d{4})?\s*((?:北海道|東京都|大阪府|京都府|(?:[一-龥]{2,3}県))[一-龥ぁ-んァ-ヴー\d０-９ー\-－()（） ]+(?:市|区|町|村|郡)[一-龥ぁ-んァ-ヴー\d０-９ー\-－()（） ]*)/;
+  for(let i=0;i<lines.length;i++){
+    const ln=lines[i];
+    const mm=ln.match(addrRe);
+    if(mm){
+      let addr=ln;
+      const next=lines[i+1];
+      if(next&&/^[一-龥ぁ-んァ-ヴー\d０-９ー\-－()（） ]+$/.test(next)&&next.length<=40&&!/[@]/.test(next))addr+=' '+next;
+      out.address=addr.trim();break;
+    }
+  }
+  if(!out.address){
+    const zipMatch=all.match(/〒?\s*\d{3}[-－]\d{4}\s*[^\n@]{5,60}/);
+    if(zipMatch)out.address=zipMatch[0].trim();
+  }
+
+  const isMeta=s=>/[@\d]/.test(s)||/^(TEL|FAX|MAIL|MOBILE|MOB|PHONE|URL|WEB|HTTPS?|WWW|〒|FACEBOOK|TWITTER|INSTAGRAM|LINE|YOUTUBE|TIKTOK)/i.test(s)||/(東京都|大阪府|京都府|北海道|.+[都道府県].+[市区町村])/.test(s);
+  const isDecoration=s=>/^[A-Z][.\s]*[A-Z][.]?$/.test(s)||s.length<=2;
+  const candidates=lines.filter(ln=>ln!==out.title&&ln!==out.company&&!isMeta(ln)&&!isDecoration(ln)&&ln.length<=25);
+
+  const hasJP=s=>/[一-龥ぁ-んァ-ヴー]/.test(s);
+  const isJPName=s=>/^[一-龥ぁ-んァ-ヴー][一-龥ぁ-んァ-ヴー\s　・]{1,14}$/.test(s);
+  const isENName=s=>/^[A-Z][a-zA-Z]+(\s+[A-Z][a-zA-Z.]+){1,3}$/.test(s);
+
+  let pick=candidates.find(isJPName);
+  if(!pick)pick=candidates.find(isENName);
+  if(!pick)pick=candidates.find(s=>hasJP(s)&&s.length<=15);
+  if(!pick)pick=candidates.find(s=>/^[A-Za-z][A-Za-z\s.]{1,30}$/.test(s));
+  if(pick)out.name=pick.replace(/\s+/g,' ').trim();
+
+  return out;
+}
+
+function fillFields(data){
+  ['company','address','name','title','email','phone','mobile'].forEach(k=>{
+    const el=document.getElementById(k);
+    if(el&&data[k]){el.value=data[k];el.classList.add('ai-filled');}
+  });
+}
+
+const PROMPT=`この名刺画像から情報を抽出し、以下のJSON形式のみで返答してください（前置き・説明文は不要）：
+{"company":"会社名・施設名","name":"担当者名（姓名）","title":"役職","email":"メールアドレス","phone":"電話番号（代表より直通・携帯を優先）"}
+読み取れない項目は空文字にしてください。`;
+
+function copyPrompt(){
+  navigator.clipboard.writeText(PROMPT).then(()=>{
+    const b=document.getElementById('copy-btn');
+    b.textContent='✓ コピーしました';
+    b.style.cssText='background:var(--green-light);border-color:var(--green);color:var(--green);';
+    setTimeout(()=>{
+      b.innerHTML='<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="4" width="8" height="8" rx="1.5"/><path d="M4 4V2.5A1.5 1.5 0 0 1 5.5 1h5A1.5 1.5 0 0 1 12 2.5v5A1.5 1.5 0 0 1 10.5 9H9"/></svg> プロンプトをコピー';
+      b.style.cssText='';
+    },2000);
+  }).catch(()=>showToast('コピー失敗。手動でコピーしてください'));
+}
+
+function parseAndFill(){
+  const raw=document.getElementById('paste-area').value.trim();
+  if(!raw){setPS('err','JSONを貼り付けてください');return;}
+  try{
+    const m=raw.replace(/```json|```/g,'').match(/\{[\s\S]*\}/);
+    if(!m)throw 0;
+    const data=JSON.parse(m[0]);
+    ['company','address','name','title','email','phone','mobile'].forEach(k=>{
+      const el=document.getElementById(k);
+      if(el&&data[k]){el.value=data[k];el.classList.add('ai-filled');}
+    });
+    setPS('ok','✓ 入力完了！内容をご確認ください');
+    document.getElementById('paste-area').value='';
+  }catch{setPS('err','形式が正しくありません。JSONをそのまま貼り付けてください');}
+}
+function setPS(t,m){const el=document.getElementById('parse-status');el.className='status-bar'+(t?' '+t:'');el.textContent=m;}
+['company','address','name','title','email','phone','mobile'].forEach(f=>{
+  document.getElementById(f)?.addEventListener('input',()=>document.getElementById(f).classList.remove('ai-filled'));
+});
+
+function setStar(v){starVal=v;document.querySelectorAll('.star-btn').forEach(b=>b.classList.toggle('on',+b.dataset.val<=v));document.getElementById('star-count').textContent=v+' / 5';}
+
+function clearForm(){
+  ['company','address','name','title','email','phone','mobile','industry','memo'].forEach(f=>{const el=document.getElementById(f);if(el){el.value='';el.classList.remove('ai-filled');}});
+  starVal=0;
+  document.querySelectorAll('.star-btn').forEach(b=>b.classList.remove('on'));
+  document.getElementById('star-count').textContent='未評価';
+  document.getElementById('scan-preview').style.display='none';
+  document.getElementById('scan-guide').style.display='';
+  document.getElementById('claude-panel').classList.remove('show');
+  document.getElementById('paste-area').value='';
+  document.getElementById('ocr-btn').style.display='none';
+  document.getElementById('claude-fallback').style.display='none';
+  document.getElementById('claude-fallback').open=false;
+  lastImageDataURL=null;
+  setPS('','');
+  setOS('','');
+  document.getElementById('ocr-status').style.display='none';
+}
+
+let lastSavedHearingId=null;
+let linkedEstimateId=null;
+
+function submitForm(){
+  const company=document.getElementById('company').value.trim();
+  const name=document.getElementById('name').value.trim();
+  if(!company||!name){showToast('会社名と担当者名は必須です');return;}
+  const id=Date.now();
+  const r={id,時刻:new Date().toLocaleString('ja-JP'),会社名:company,住所:document.getElementById('address').value.trim(),担当者名:name,役職:document.getElementById('title').value.trim(),メール:document.getElementById('email').value.trim(),電話:document.getElementById('phone').value.trim(),携帯:document.getElementById('mobile').value.trim(),業種:document.getElementById('industry').value.trim(),関心度:starVal?starVal+'/5':'未評価',メモ:document.getElementById('memo').value.trim(),linked_estimate_id:linkedEstimateId||null};
+  const rs=rec();rs.unshift(r);saveRec(rs);refreshCount();
+  if(linkedEstimateId){
+    try{
+      const est=JSON.parse(localStorage.getItem('estimate_records')||'[]');
+      const idx=est.findIndex(e=>e.id==linkedEstimateId);
+      if(idx>=0){est[idx].linked_hearing_id=id;localStorage.setItem('estimate_records',JSON.stringify(est));}
+    }catch(e){}
+  }
+  lastSavedHearingId=id;
+  showToast('✓ 登録しました');
+  if(getSheetUrl()){
+    sendToSheet(r).then(res=>{
+      if(res.ok)showToast('✓ スプレッドシートへ送信しました');
+    });
+  }
+  document.getElementById('post-submit-panel').style.display='';
+  document.getElementById('post-submit-summary').innerHTML='<strong>'+company+'</strong>　'+name+'様<br>'+r.時刻;
+  if(linkedEstimateId){
+    try{
+      const est=JSON.parse(localStorage.getItem('estimate_records')||'[]').find(e=>e.id==linkedEstimateId);
+      if(est){
+        const linkEl=document.getElementById('post-submit-linked');
+        linkEl.style.display='';
+        linkEl.innerHTML='紐付き見積もり: '+(est.summary||'')+(est.total?'　¥'+est.total.toLocaleString():'');
+      }
+    }catch(e){}
+  }
+  document.getElementById('post-submit-panel').scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+function proceedToEstimate(){
+  if(!lastSavedHearingId)return;
+  location.href='../estimate/?from_hearing='+lastSavedHearingId;
+}
+function goToList(){
+  resetAfterSubmit();
+  switchTab('list');
+}
+function resetAfterSubmit(){
+  document.getElementById('post-submit-panel').style.display='none';
+  linkedEstimateId=null;
+  document.getElementById('from-estimate-banner').style.display='none';
+  clearForm();
+}
+
+(()=>{
+  const params=new URLSearchParams(location.search);
+  const fromEst=params.get('from_estimate');
+  if(!fromEst)return;
+  try{
+    const est=JSON.parse(localStorage.getItem('estimate_records')||'[]').find(e=>e.id==fromEst);
+    if(!est)return;
+    linkedEstimateId=fromEst;
+    const cust=est.customer||{};
+    ['company','name','title','email','phone','mobile','address','industry'].forEach(k=>{
+      const el=document.getElementById(k);
+      if(el&&cust[k])el.value=cust[k];
+    });
+    const banner=document.getElementById('from-estimate-banner');
+    banner.style.display='';
+    document.getElementById('from-estimate-summary').innerHTML=(est.summary||'見積もり')+(est.total?'　¥'+est.total.toLocaleString():'')+'　('+(est.時刻||'')+')';
+  }catch(e){console.warn(e);}
+})();
+
+const AVT=[['#E6F1FB','#0C447C'],['#EAF3DE','#27500A'],['#FAEEDA','#633806'],['#FBEAF0','#72243E'],['#E1F5EE','#085041']];
+function renderList(){
+  const rs=rec();
+  const el=document.getElementById('lead-list');
+  if(!rs.length){el.innerHTML='<div style="text-align:center;padding:48px 20px;color:var(--text3);"><div style="font-size:36px;margin-bottom:12px;opacity:.4;">📋</div><div style="font-size:13px;">まだ登録がありません</div></div>';return;}
+  el.innerHTML=rs.map((r,i)=>{const c=AVT[i%AVT.length];return`<div class="lead-card"><div class="lc-head"><div class="avatar" style="background:${c[0]};color:${c[1]};">${r.担当者名?r.担当者名[0]:'?'}</div><div style="flex:1;min-width:0;"><div class="lead-name">${r.担当者名}</div><div class="lead-co">${r.会社名}${r.役職?' / '+r.役職:''}</div></div></div><div class="lead-meta">${r.関心度!=='未評価'?`<span class="badge badge-gray" style="font-size:10px;">★ ${r.関心度}</span>`:''}<span class="lead-time">${r.時刻}</span></div>${r.メモ?`<div style="font-size:12px;color:var(--text2);margin-top:6px;border-top:1px solid var(--border);padding-top:6px;">${r.メモ}</div>`:''}</div>`;}).join('');
+}
+renderList();
+
+function exportCSV(){
+  const rs=rec();if(!rs.length){showToast('データがありません');return;}
+  const H=['登録日時','会社名','住所','担当者名','役職','メール','電話','携帯','業種','関心度','メモ'];
+  const rows=rs.map(r=>[r.時刻,r.会社名,r.住所,r.担当者名,r.役職,r.メール,r.電話,r.携帯,r.業種,r.関心度,r.メモ].map(v=>`"${(v||'').replace(/"/g,'""')}"`).join(','));
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\uFEFF'+H.join(',')+'\n'+rows.join('\n')],{type:'text/csv;charset=utf-8;'}));
+  a.download='hearing_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+}
+function clearAllData(){if(!confirm('全データを削除しますか？'))return;localStorage.removeItem('hr');refreshCount();renderList();showToast('削除しました');}
+
+function saveOcrKey(){
+  const k=document.getElementById('ocr-key-input').value.trim();
+  if(!k){showToast('APIキーを入力してください');return;}
+  localStorage.setItem('ocrspace_key',k);
+  showToast('✓ APIキーを保存しました');
+}
+(()=>{const s=localStorage.getItem('ocrspace_key');const el=document.getElementById('ocr-key-input');if(s&&el)el.value=s;})();
+
+function getSheetUrl(){return localStorage.getItem('sheet_webhook_url')||'';}
+function saveSheetUrl(){
+  const u=document.getElementById('sheet-url-input').value.trim();
+  if(!u){showToast('URLを入力してください');return;}
+  if(!/^https:\/\/script\.google\.com\/macros\/s\//.test(u)){showToast('Apps ScriptのウェブアプリURLを入力してください');return;}
+  localStorage.setItem('sheet_webhook_url',u);
+  showToast('✓ 連携先URLを保存しました');
+}
+(()=>{const s=getSheetUrl();const el=document.getElementById('sheet-url-input');if(s&&el)el.value=s;})();
+
+function copyGasCode(){
+  const ta=document.getElementById('gas-code');
+  navigator.clipboard.writeText(ta.value).then(()=>showToast('✓ コードをコピーしました')).catch(()=>{ta.select();showToast('手動でコピーしてください');});
+}
+
+function setSheetStatus(t,m){
+  const el=document.getElementById('sheet-status');
+  el.className='status-bar'+(t?' '+t:'');
+  el.style.display=t?'flex':'none';
+  el.textContent=m||'';
+}
+
+async function sendToSheet(record){
+  const url=getSheetUrl();
+  if(!url)return {ok:false,skipped:true};
+  try{
+    let summary='',total='';
+    if(record.linked_estimate_id){
+      try{
+        const est=JSON.parse(localStorage.getItem('estimate_records')||'[]').find(e=>e.id==record.linked_estimate_id);
+        if(est){summary=est.summary||'';total=est.total||'';}
+      }catch(e){}
+    }
+    const payload={...record,'見積もり要約':summary,'見積もり合計':total};
+    await fetch(url,{
+      method:'POST',
+      mode:'no-cors',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify(payload)
+    });
+    return {ok:true};
+  }catch(err){
+    console.error('Sheet send error:',err);
+    return {ok:false,error:err.message};
+  }
+}
+
+async function testSheetWebhook(){
+  const url=getSheetUrl();
+  if(!url){setSheetStatus('err','先にURLを保存してください');return;}
+  setSheetStatus('','送信中...');
+  document.getElementById('sheet-status').style.display='flex';
+  const dummy={時刻:new Date().toLocaleString('ja-JP'),会社名:'【テスト送信】',住所:'',担当者名:'テスト太郎',役職:'',メール:'',電話:'',携帯:'',業種:'',関心度:'未評価',メモ:'接続テスト'};
+  const res=await sendToSheet(dummy);
+  if(res.ok)setSheetStatus('ok','✓ 送信しました（スプレッドシートを確認してください）');
+  else setSheetStatus('err','送信失敗：'+(res.error||'通信エラー'));
+}
+
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
+
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>

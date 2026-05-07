@@ -648,14 +648,81 @@ function renderNavBar(backLabel, nextLabel, nextDisabled) {
 }
 
 function renderEstimateFooter() {
+  const hearingBtnLabel = state.fromHearingId ? 'ヒアリング登録に戻る →' : 'ヒアリング登録へ →';
   return `<div class="nav-bar"><div class="nav-bar-inner">
     <button class="btn btn-secondary" id="btn-back">← 戻る</button>
-    <div style="display:flex;gap:10px;">
+    <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;">
       <button class="btn btn-print" onclick="window.print()">🖨 印刷</button>
       <button class="btn btn-secondary" id="btn-add-product">＋ 別製品を追加</button>
       <button class="btn btn-secondary" id="btn-restart">最初からやり直す</button>
+      <button class="btn btn-primary" onclick="proceedToHearing()" style="background:#2D2D2D;color:#fff;">${hearingBtnLabel}</button>
     </div>
   </div></div>`;
+}
+
+function getEstimateSummary() {
+  if (!state.savedEstimates || !state.savedEstimates.length) return null;
+  const labels = state.savedEstimates.map(e => e.label).join(' / ');
+  const total = state.savedEstimates.reduce((s,e)=>s+(e.total||0),0);
+  return { summary: labels, total };
+}
+
+function proceedToHearing() {
+  if (state.productType && currentStepId() === 'estimate') {
+    saveCurrentEstimate();
+  }
+  const sum = getEstimateSummary();
+  if (!sum) { alert('保存された見積もりがありません'); return; }
+  const id = Date.now();
+  let customer = {};
+  if (state.fromHearingId) {
+    try {
+      const hr = JSON.parse(localStorage.getItem('hr')||'[]').find(h => h.id == state.fromHearingId);
+      if (hr) customer = { company: hr.会社名, name: hr.担当者名, title: hr.役職, email: hr.メール, phone: hr.電話, mobile: hr.携帯, address: hr.住所, industry: hr.業種 };
+    } catch(e){}
+  }
+  const record = {
+    id, 時刻: new Date().toLocaleString('ja-JP'),
+    summary: sum.summary, total: sum.total,
+    estimates: state.savedEstimates,
+    customer,
+    linked_hearing_id: state.fromHearingId || null,
+  };
+  try {
+    const arr = JSON.parse(localStorage.getItem('estimate_records')||'[]');
+    arr.unshift(record);
+    localStorage.setItem('estimate_records', JSON.stringify(arr));
+  } catch(e){}
+  if (state.fromHearingId) {
+    try {
+      const hr = JSON.parse(localStorage.getItem('hr')||'[]');
+      const idx = hr.findIndex(h => h.id == state.fromHearingId);
+      if (idx >= 0) { hr[idx].linked_estimate_id = id; localStorage.setItem('hr', JSON.stringify(hr)); }
+    } catch(e){}
+    location.href = '../hearing/';
+  } else {
+    location.href = '../hearing/?from_estimate=' + id;
+  }
+}
+
+(function readHearingParam(){
+  try {
+    const params = new URLSearchParams(location.search);
+    const fh = params.get('from_hearing');
+    if (!fh) return;
+    state.fromHearingId = fh;
+    const hr = JSON.parse(localStorage.getItem('hr')||'[]').find(h => h.id == fh);
+    if (hr) state.fromHearingRecord = hr;
+  } catch(e){}
+})();
+
+function renderFromHearingBanner() {
+  if (!state.fromHearingRecord) return '';
+  const r = state.fromHearingRecord;
+  return `<div style="background:#2D2D2D;color:#fff;padding:10px 16px;font-size:12px;letter-spacing:0.04em;display:flex;justify-content:space-between;align-items:center;">
+    <span><strong>${r.会社名||''}</strong>　${r.担当者名||''} 様向け見積もり</span>
+    <a href="../hearing/" style="color:#fff;text-decoration:underline;font-size:11px;">ヒアリングへ戻る</a>
+  </div>`;
 }
 
 function saveCurrentEstimate() {
@@ -1737,9 +1804,11 @@ function render() {
 
   app.innerHTML = `
     <div class="header">
+      <a href="../" style="text-decoration:none;color:#888;font-size:11px;letter-spacing:0.06em;display:flex;align-items:center;gap:4px;padding:4px 8px;border:1px solid #E2E2E2;border-radius:3px;background:#fff;">← ホーム</a>
       <div class="header-logo">簡易見積もりシステム</div>
-      <img class="header-logo-img" src="images/sense_logo.jpg.png.png?v=3" alt="SENSE Product Company" onerror="this.src='images/sense_logo.jpg.png?v=3';this.onerror=function(){this.style.display='none';}">
+      <a href="../" style="display:block;line-height:0;"><img class="header-logo-img" src="images/sense_logo.jpg.png.png?v=3" alt="SENSE Product Company — ホームへ" onerror="this.src='images/sense_logo.jpg.png?v=3';this.onerror=function(){this.style.display='none';}"></a>
     </div>
+    ${renderFromHearingBanner()}
     ${progressBar}
     <div class="${isStepChange ? 'container container-entering' : 'container'}">
       ${errorHtml}

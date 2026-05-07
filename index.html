@@ -1,13 +1,90 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>簡易見積もり | blanc & megurino</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#2D2D2D">
+<title>SENSE Tools | blanc & megurino</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;touch-action:manipulation;}
+html,body{min-height:100vh;}
+body{
+  font-family:'Hiragino Kaku Gothic Pro','Meiryo','Yu Gothic',sans-serif;
+  background:#F4F4F4;color:#2D2D2D;font-size:14px;line-height:1.6;
+  display:flex;flex-direction:column;
+}
+.header{
+  background:#fff;border-bottom:1px solid #E2E2E2;padding:16px 20px;
+  display:flex;align-items:center;justify-content:flex-end;
+}
+.header-logo-img{height:28px;width:auto;display:block;}
+
+.main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px 60px;}
+.intro{text-align:center;margin-bottom:36px;max-width:520px;}
+.intro-title{font-size:22px;font-weight:700;color:#1A1A1A;letter-spacing:0.06em;margin-bottom:10px;}
+.intro-sub{font-size:13px;color:#888;letter-spacing:0.02em;line-height:1.8;}
+
+.cards{display:grid;grid-template-columns:1fr;gap:14px;width:100%;max-width:520px;}
+@media(min-width:680px){.cards{grid-template-columns:1fr 1fr;gap:18px;max-width:720px;}}
+
+.card{
+  background:#fff;border:1px solid #E2E2E2;border-radius:4px;
+  padding:28px 24px;text-decoration:none;color:inherit;
+  display:flex;flex-direction:column;gap:14px;
+  transition:border-color 0.15s,background 0.15s,transform 0.1s,box-shadow 0.15s;
+  cursor:pointer;
+}
+.card:hover{border-color:#2D2D2D;transform:translateY(-2px);box-shadow:0 4px 14px rgba(0,0,0,0.06);}
+.card:active{transform:translateY(0);}
+.card-icon{
+  width:44px;height:44px;border-radius:50%;background:#F4F4F4;
+  display:flex;align-items:center;justify-content:center;
+}
+.card-icon svg{width:22px;height:22px;stroke:#2D2D2D;stroke-width:1.4;fill:none;}
+.card-title{font-size:16px;font-weight:700;color:#1A1A1A;letter-spacing:0.04em;}
+.card-desc{font-size:12px;color:#888;line-height:1.7;}
+.card-arrow{margin-top:auto;font-size:12px;color:#2D2D2D;letter-spacing:0.08em;font-weight:600;display:flex;align-items:center;gap:6px;}
+.card-arrow::after{content:'→';font-size:14px;}
+
+.footer{padding:18px 20px;text-align:center;font-size:11px;color:#AAAAAA;letter-spacing:0.06em;}
+</style>
 </head>
 <body>
-  <div id="app"></div>
-  <script src="app.js"></script>
+<header class="header">
+  <img class="header-logo-img" src="./estimate/images/sense_logo.jpg.png.png?v=3" alt="SENSE Product Company" onerror="this.src='./estimate/images/sense_logo.jpg.png?v=3';this.onerror=function(){this.style.display='none';}">
+</header>
+
+<main class="main">
+  <div class="intro">
+    <div class="intro-title">SENSE Tools</div>
+    <div class="intro-sub">利用するツールを選択してください</div>
+  </div>
+
+  <div class="cards">
+    <a href="./estimate/" class="card">
+      <div class="card-icon">
+        <svg viewBox="0 0 24 24"><path d="M9 7h6M9 11h6M9 15h4"/><rect x="5" y="3" width="14" height="18" rx="1.5"/></svg>
+      </div>
+      <div>
+        <div class="card-title">簡易見積もり</div>
+        <div class="card-desc">blanc / megurino / LOGS SAUNA / mera<br>製品の組み合わせから概算見積もりを作成</div>
+      </div>
+      <div class="card-arrow">START</div>
+    </a>
+
+    <a href="./hearing/" class="card">
+      <div class="card-icon">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+      </div>
+      <div>
+        <div class="card-title">展示会ヒアリング</div>
+        <div class="card-desc">来場者情報の記録・名刺スキャン<br>OCR自動入力・CSV出力対応</div>
+      </div>
+      <div class="card-arrow">START</div>
+    </a>
+  </div>
+</main>
+
+<footer class="footer">© SENSE Product Company</footer>
 </body>
 </html>
