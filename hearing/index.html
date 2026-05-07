@@ -398,7 +398,35 @@ textarea{resize:none;min-height:64px;}
     </div>
 
     <div class="section">
-      <div class="sh"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6.5" cy="6.5" r="2"/><path d="M6.5 1v1.5M6.5 10V11.5M1 6.5h1.5M10 6.5H11.5"/></svg>OCR.space APIキー（無料）</div>
+      <div class="sh"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6.5" cy="6.5" r="2"/><path d="M6.5 1v1.5M6.5 10V11.5M1 6.5h1.5M10 6.5H11.5"/></svg>Google Cloud Vision APIキー（高精度・推奨）</div>
+      <div class="sb">
+        <div style="font-size:12px;color:var(--text2);line-height:1.7;">
+          OCR.space より精度が大幅に高い Google の OCR を利用できます（月1,000枚まで無料・以降1枚 約0.2円）。<br>
+          <strong>初期設定（1回のみ）</strong>:<br>
+          ① <a href="https://console.cloud.google.com/" target="_blank" style="color:var(--accent);">Google Cloud Console</a> にログイン<br>
+          ② プロジェクトを作成（任意の名前）<br>
+          ③ 左メニュー「APIとサービス」→「ライブラリ」→ <strong>「Cloud Vision API」</strong> を有効化<br>
+          ④ 「APIとサービス」→「認証情報」→ <strong>「+ 認証情報を作成」→「APIキー」</strong><br>
+          ⑤ 表示されたキー（<code>AIza...</code>）を下に貼り付け<br>
+          ⑥（推奨）作成したキーを編集 → API制限で「Cloud Vision API」のみ許可
+        </div>
+        <div class="field">
+          <label class="lbl">APIキー</label>
+          <input type="text" id="gcv-key-input" placeholder="AIzaSy..." autocomplete="off" autocorrect="off" spellcheck="false">
+        </div>
+        <button class="btn btn-p" onclick="saveGcvKey()" style="width:100%;">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 7l4 4 6-6"/></svg>
+          保存する
+        </button>
+        <div style="font-size:11px;color:var(--text3);line-height:1.6;">
+          ※ 1,000枚を超えると課金されます。心配な場合は GCP の予算アラートを設定してください。<br>
+          ※ キーは端末内（localStorage）のみに保存され、外部送信はGoogleのみです。
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sh"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6.5" cy="6.5" r="2"/><path d="M6.5 1v1.5M6.5 10V11.5M1 6.5h1.5M10 6.5H11.5"/></svg>OCR.space APIキー（フォールバック・任意）</div>
       <div class="sb">
         <div style="font-size:12px;color:var(--text2);line-height:1.7;">
           OCR読み取りには <strong>OCR.space</strong> の無料APIキーが必要です（月25,000回まで・<strong>クレジットカード不要</strong>）。<br>
@@ -522,6 +550,49 @@ document.addEventListener('DOMContentLoaded',()=>{
 function setOS(t,m){const el=document.getElementById('ocr-status');el.className='status-bar'+(t?' '+t:'');el.innerHTML=m;}
 
 function getOcrKey(){return localStorage.getItem('ocrspace_key')||'';}
+function getGcvKey(){return localStorage.getItem('gcv_key')||'';}
+function saveGcvKey(){
+  const k=document.getElementById('gcv-key-input').value.trim();
+  if(!k){showToast('APIキーを入力してください');return;}
+  if(!/^AIza[\w-]{20,}$/.test(k)){showToast('Google APIキー（AIza...）の形式で入力してください');return;}
+  localStorage.setItem('gcv_key',k);
+  showToast('✓ Google Vision APIキーを保存しました');
+}
+(()=>{const s=getGcvKey();const el=document.getElementById('gcv-key-input');if(s&&el)el.value=s;})();
+
+async function ocrWithGoogleVision(dataURL,key){
+  const base64=dataURL.split(',')[1];
+  const url='https://vision.googleapis.com/v1/images:annotate?key='+encodeURIComponent(key);
+  const body={requests:[{image:{content:base64},features:[{type:'DOCUMENT_TEXT_DETECTION'}],imageContext:{languageHints:['ja','en']}}]};
+  const res=await fetchWithTimeout(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)},45000);
+  if(!res.ok){
+    let msg='HTTP '+res.status;
+    try{const j=await res.json();if(j.error?.message)msg=j.error.message;}catch(e){}
+    throw new Error(msg);
+  }
+  const json=await res.json();
+  const r=json.responses?.[0];
+  if(r?.error)throw new Error(r.error.message||'Vision APIエラー');
+  return r?.fullTextAnnotation?.text||'';
+}
+
+async function ocrWithOcrSpace(dataURL,key){
+  const compressed=await compressImage(dataURL,950000);
+  const fd=new FormData();
+  fd.append('base64Image',compressed);
+  fd.append('language','jpn');
+  fd.append('OCREngine','2');
+  fd.append('scale','true');
+  fd.append('isTable','false');
+  const res=await fetchWithTimeout('https://api.ocr.space/parse/image',{method:'POST',headers:{apikey:key},body:fd},45000);
+  if(!res.ok)throw new Error('HTTP '+res.status);
+  const json=await res.json();
+  if(json.IsErroredOnProcessing){
+    const msg=Array.isArray(json.ErrorMessage)?json.ErrorMessage.join(' '):json.ErrorMessage||'OCR APIエラー';
+    throw new Error(msg);
+  }
+  return json.ParsedResults?.[0]?.ParsedText||'';
+}
 
 async function compressImage(dataURL,maxBytes){
   return new Promise((resolve,reject)=>{
@@ -555,51 +626,148 @@ async function fetchWithTimeout(url,opts,ms){
   finally{clearTimeout(t);}
 }
 
+// OCR.space に1回送信して結果を返す（失敗時は throw）
+async function _ocrSpaceCall(base64Image, key, engine, timeoutMs){
+  const fd=new FormData();
+  fd.append('base64Image',base64Image);
+  fd.append('language','jpn');
+  fd.append('OCREngine',String(engine));
+  fd.append('scale','true');
+  fd.append('isTable','false');
+  fd.append('detectOrientation','true');
+  const res=await fetchWithTimeout('https://api.ocr.space/parse/image',
+    {method:'POST',headers:{apikey:key},body:fd}, timeoutMs);
+  if(!res.ok)throw new Error('HTTP '+res.status);
+  const json=await res.json();
+  if(json.IsErroredOnProcessing){
+    const msg=Array.isArray(json.ErrorMessage)?json.ErrorMessage.join(' '):json.ErrorMessage||'OCR APIエラー';
+    throw new Error(msg);
+  }
+  const text=json.ParsedResults?.[0]?.ParsedText||'';
+  return text;
+}
+
 async function runOCR(){
   if(!lastImageDataURL){showToast('画像がありません');return;}
+  const gcvKey=getGcvKey();
   const key=getOcrKey();
-  if(!key){
-    setOS('err','OCR.space の無料APIキーが未設定です。「設定」タブから取得・登録してください');
+  if(!gcvKey&&!key){
+    setOS('err','APIキーが未設定です。「設定」タブで Google Cloud Vision または OCR.space のキーを登録してください');
     document.getElementById('ocr-status').style.display='flex';
-    setTimeout(()=>switchTab('settings'),1200);
+    setTimeout(()=>switchTab('settings'),1500);
     return;
   }
   const btn=document.getElementById('ocr-btn');
   btn.disabled=true;
   document.getElementById('ocr-status').style.display='flex';
-  setOS('','<span style="width:12px;height:12px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;vertical-align:middle;"></span> 画像を圧縮中...');
-  try{
-    const compressed=await compressImage(lastImageDataURL,950000);
-    setOS('','<span style="width:12px;height:12px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;vertical-align:middle;"></span> OCRサーバーに送信中...');
-    const fd=new FormData();
-    fd.append('base64Image',compressed);
-    fd.append('language','jpn');
-    fd.append('OCREngine','2');
-    fd.append('scale','true');
-    fd.append('isTable','false');
-    const res=await fetchWithTimeout('https://api.ocr.space/parse/image',{method:'POST',headers:{apikey:key},body:fd},45000);
-    if(!res.ok)throw new Error('HTTP '+res.status);
-    const json=await res.json();
-    if(json.IsErroredOnProcessing){
-      const msg=Array.isArray(json.ErrorMessage)?json.ErrorMessage.join(' '):json.ErrorMessage||'OCR APIエラー';
-      throw new Error(msg);
+  const spinner='<span style="width:12px;height:12px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;vertical-align:middle;"></span>';
+  // ★ Google Cloud Vision を優先試行（精度大幅向上・月1000枚無料）
+  if(gcvKey){
+    try{
+      setOS('',`${spinner} Google Cloud Vision で読み取り中...`);
+      const text=await ocrWithGoogleVision(lastImageDataURL,gcvKey);
+      if(text.trim()){
+        const parsed=parseCardText(text);
+        fillFields(parsed);
+        const filled=Object.values(parsed).filter(Boolean).length;
+        if(filled===0)setOS('err','文字は検出しましたが項目を抽出できませんでした。手入力してください');
+        else setOS('ok',`✓ ${filled}項目を抽出しました（Google Cloud Vision）。内容をご確認ください`);
+        btn.disabled=false;
+        return;
+      }
+      throw new Error('Google Visionが文字を検出できませんでした');
+    }catch(err){
+      console.warn('GCV failed, fallback:',err);
+      const m=err.message||'';
+      if(/API key not valid|API_KEY_INVALID/i.test(m)){
+        setOS('err','Google APIキーが無効です。設定タブでキーを確認してください');
+        btn.disabled=false;return;
+      }
+      if(/PERMISSION_DENIED|not been used|disabled/i.test(m)){
+        setOS('err','Cloud Vision APIが有効化されていません。GCPコンソールで有効化してください');
+        btn.disabled=false;return;
+      }
+      if(/RESOURCE_EXHAUSTED|quota/i.test(m)){
+        setOS('err','Google Vision の無料枠（月1000枚）を超過しました。GCPで予算を確認してください');
+        btn.disabled=false;return;
+      }
+      if(!key){
+        setOS('err','Google Vision で失敗：'+m+'（OCR.space のキーを設定するとフォールバック可能）');
+        btn.disabled=false;return;
+      }
+      setOS('',`${spinner} Google Vision失敗 → OCR.spaceで再試行中...`);
+      await new Promise(r=>setTimeout(r,500));
     }
-    const text=json.ParsedResults?.[0]?.ParsedText||'';
-    if(!text.trim())throw new Error('文字が検出できませんでした');
-    const parsed=parseCardText(text);
-    fillFields(parsed);
-    const filled=Object.values(parsed).filter(Boolean).length;
-    if(filled===0){setOS('err','文字は検出しましたが項目を抽出できませんでした。手入力してください');}
-    else{setOS('ok',`✓ ${filled}項目を抽出しました。内容をご確認ください`);}
+  }
+  // ★ 段階的フォールバック戦略:
+  //   1) Engine 1 + 軽量画像 (600KB) - 速くて成功率高い
+  //   2) Engine 2 + 軽量画像 (600KB) - 精度高いが遅い
+  //   3) Engine 1 + さらに小さく (300KB) - 最終手段
+  // タイムアウトは 60 秒に拡張（無料枠は時間帯で詰まりやすい）
+  const attempts=[
+    {engine:1, maxBytes:600000, timeout:60000, label:'Engine1・軽量'},
+    {engine:2, maxBytes:600000, timeout:90000, label:'Engine2・高精度'},
+    {engine:1, maxBytes:300000, timeout:60000, label:'Engine1・最小'},
+  ];
+  let lastError=null;
+  let success=false;
+  try{
+    setOS('',`${spinner} 画像を圧縮中...`);
+    let compressedCache={};
+    for(let i=0;i<attempts.length;i++){
+      const a=attempts[i];
+      try{
+        if(!compressedCache[a.maxBytes]){
+          compressedCache[a.maxBytes]=await compressImage(lastImageDataURL,a.maxBytes);
+        }
+        const compressed=compressedCache[a.maxBytes];
+        setOS('',`${spinner} OCR ${i+1}/${attempts.length}回目: ${a.label}（最長${a.timeout/1000}秒）...`);
+        const text=await _ocrSpaceCall(compressed,key,a.engine,a.timeout);
+        if(!text.trim()){
+          lastError=new Error('文字が検出できませんでした');
+          continue;
+        }
+        const parsed=parseCardText(text);
+        fillFields(parsed);
+        const filled=Object.values(parsed).filter(Boolean).length;
+        if(filled===0){
+          setOS('err','文字は検出しましたが項目を抽出できませんでした。手入力してください');
+        }else{
+          setOS('ok',`✓ ${filled}項目を抽出しました（${a.label}）。内容をご確認ください`);
+        }
+        success=true;
+        break;
+      }catch(err){
+        lastError=err;
+        // タイムアウト/サーバー詰まりなら次の戦略へ。それ以外（API キー無効など）は即停止
+        const m=err.message||'';
+        if(/key|apikey|invalid/i.test(m) || /rate|limit|quota/i.test(m)){
+          break;  // これ以上試しても無駄
+        }
+        // E101: Timed out / AbortError / HTTP 5xx などはリトライ
+        if(i<attempts.length-1){
+          setOS('',`${spinner} ${a.label}失敗 → 別の方法を試します...`);
+          await new Promise(r=>setTimeout(r,800));  // 0.8秒待機
+        }
+      }
+    }
+    if(!success){
+      const err=lastError||new Error('原因不明');
+      const m=err.message||'';
+      let msg='OCRに失敗しました：'+m;
+      if(err.name==='AbortError')msg='タイムアウト：3回試行しても応答なし。画像が複雑な場合や混雑時間帯で起きやすいため、claude.aiで手動読み取りをお試しください';
+      else if(/E101|Timed out waiting/i.test(m))msg='OCR.space サーバー側タイムアウト（3回試行後）：時間をおくか、claude.aiで手動読み取りをお試しください';
+      else if(/key|apikey|invalid/i.test(m))msg='APIキーが無効です。設定タブで OCR.space の無料キーを入力してください';
+      else if(/rate|limit|quota/i.test(m))msg='APIの利用制限に達しました。時間をおいて再試行してください';
+      else if(/文字が検出/.test(m))msg='文字が検出できませんでした。明るい場所で撮り直すか、claude.aiで手動読み取りをお試しください';
+      setOS('err',msg);
+    }
   }catch(err){
     console.error(err);
-    let m='OCRに失敗しました：'+(err.message||'通信エラー');
-    if(err.name==='AbortError')m='タイムアウト（45秒）。画像を小さくするか時間をおいて再試行してください';
-    else if(/key|apikey|invalid/i.test(err.message||''))m='APIキーが無効です。設定タブで OCR.space の無料キーを入力してください';
-    else if(/rate|limit|quota/i.test(err.message||''))m='APIの利用制限に達しました。時間をおいて再試行してください';
-    setOS('err',m);
+    setOS('err','OCRに失敗しました：'+(err.message||'通信エラー'));
+  }finally{
+    btn.disabled=false;
   }
-  btn.disabled=false;
 }
 
 function parseCardText(text){
