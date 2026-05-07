@@ -521,46 +521,64 @@ document.addEventListener('DOMContentLoaded',()=>{
 
 function setOS(t,m){const el=document.getElementById('ocr-status');el.className='status-bar'+(t?' '+t:'');el.innerHTML=m;}
 
-function getOcrKey(){return localStorage.getItem('ocrspace_key')||'helloworld';}
+function getOcrKey(){return localStorage.getItem('ocrspace_key')||'';}
 
 async function compressImage(dataURL,maxBytes){
-  return new Promise(resolve=>{
+  return new Promise((resolve,reject)=>{
     const img=new Image();
+    img.onerror=()=>reject(new Error('画像の読み込みに失敗しました'));
     img.onload=()=>{
-      let q=0.85,scale=1;
-      const draw=()=>{
-        const w=Math.round(img.naturalWidth*scale),h=Math.round(img.naturalHeight*scale);
-        const c=document.createElement('canvas');c.width=w;c.height=h;
-        c.getContext('2d').drawImage(img,0,0,w,h);
-        return c.toDataURL('image/jpeg',q);
-      };
-      let out=draw();
-      while(out.length*0.75>maxBytes&&(q>0.4||scale>0.4)){
-        if(q>0.45)q-=0.1;else scale*=0.85;
-        out=draw();
-      }
-      resolve(out);
+      try{
+        let q=0.85,scale=1;
+        const draw=()=>{
+          const w=Math.max(1,Math.round(img.naturalWidth*scale)),h=Math.max(1,Math.round(img.naturalHeight*scale));
+          const c=document.createElement('canvas');c.width=w;c.height=h;
+          c.getContext('2d').drawImage(img,0,0,w,h);
+          return c.toDataURL('image/jpeg',q);
+        };
+        let out=draw(),iter=0;
+        while(out.length*0.75>maxBytes&&iter<20){
+          if(q>0.45)q-=0.1;else scale*=0.85;
+          out=draw();iter++;
+        }
+        resolve(out);
+      }catch(e){reject(e);}
     };
     img.src=dataURL;
   });
 }
 
+async function fetchWithTimeout(url,opts,ms){
+  const ctrl=new AbortController();
+  const t=setTimeout(()=>ctrl.abort(),ms);
+  try{return await fetch(url,{...opts,signal:ctrl.signal});}
+  finally{clearTimeout(t);}
+}
+
 async function runOCR(){
   if(!lastImageDataURL){showToast('画像がありません');return;}
   const key=getOcrKey();
+  if(!key){
+    setOS('err','OCR.space の無料APIキーが未設定です。「設定」タブから取得・登録してください');
+    document.getElementById('ocr-status').style.display='flex';
+    setTimeout(()=>switchTab('settings'),1200);
+    return;
+  }
   const btn=document.getElementById('ocr-btn');
   btn.disabled=true;
   document.getElementById('ocr-status').style.display='flex';
-  setOS('','<span style="width:12px;height:12px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;vertical-align:middle;"></span> 読み取り中...');
+  setOS('','<span style="width:12px;height:12px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;vertical-align:middle;"></span> 画像を圧縮中...');
   try{
     const compressed=await compressImage(lastImageDataURL,950000);
+    setOS('','<span style="width:12px;height:12px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;vertical-align:middle;"></span> OCRサーバーに送信中...');
     const fd=new FormData();
     fd.append('base64Image',compressed);
     fd.append('language','jpn');
     fd.append('OCREngine','2');
     fd.append('scale','true');
     fd.append('isTable','false');
-    const res=await fetch('https://api.ocr.space/parse/image',{method:'POST',headers:{apikey:key},body:fd});
+    const res=await fetchWithTimeout('https://api.ocr.space/parse/image',{method:'POST',headers:{apikey:key},body:fd},45000);
+    if(!res.ok)throw new Error('HTTP '+res.status);
     const json=await res.json();
     if(json.IsErroredOnProcessing){
       const msg=Array.isArray(json.ErrorMessage)?json.ErrorMessage.join(' '):json.ErrorMessage||'OCR APIエラー';
@@ -576,7 +594,9 @@ async function runOCR(){
   }catch(err){
     console.error(err);
     let m='OCRに失敗しました：'+(err.message||'通信エラー');
-    if(/key|apikey|invalid/i.test(err.message||''))m='APIキーが無効です。設定タブで OCR.space の無料キーを入力してください';
+    if(err.name==='AbortError')m='タイムアウト（45秒）。画像を小さくするか時間をおいて再試行してください';
+    else if(/key|apikey|invalid/i.test(err.message||''))m='APIキーが無効です。設定タブで OCR.space の無料キーを入力してください';
+    else if(/rate|limit|quota/i.test(err.message||''))m='APIの利用制限に達しました。時間をおいて再試行してください';
     setOS('err',m);
   }
   btn.disabled=false;
