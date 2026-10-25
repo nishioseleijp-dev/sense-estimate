@@ -456,13 +456,13 @@ function getDiscountRate() {
   return 0;
 }
 
-const IMG_V = '?v=3';
+const IMG_V = '?v=4';
 function imgWrap(filename, wrapClass) {
-  return `<div class="${wrapClass}"><img src="images/${filename}.jpg.jpg?v=3" alt="" onerror="this.src='images/${filename}.jpg.jpeg?v=3';this.onerror=function(){this.src='images/${filename}.jpg.png?v=3';this.onerror=function(){this.src='images/${filename}.jpg?v=3';this.onerror=function(){this.parentElement.style.display='none';}}}"></div>`;
+  return `<div class="${wrapClass}"><img src="images/${filename}.jpg.jpg?v=4" alt="" onerror="this.src='images/${filename}.jpg.jpeg?v=4';this.onerror=function(){this.src='images/${filename}.jpg.png?v=4';this.onerror=function(){this.src='images/${filename}.jpg?v=4';this.onerror=function(){this.parentElement.style.display='none';}}}"></div>`;
 }
 function heroImg(filename, cssClass, style) {
   const styleAttr = style ? ` style="${style}"` : '';
-  return `<img class="${cssClass}"${styleAttr} src="images/${filename}.jpg.jpg?v=3" alt="" onerror="this.src='images/${filename}.jpg.jpeg?v=3';this.onerror=function(){this.src='images/${filename}.jpg.png?v=3';this.onerror=function(){this.src='images/${filename}.jpg?v=3';this.onerror=function(){this.style.display='none';}}}">`;
+  return `<img class="${cssClass}"${styleAttr} src="images/${filename}.jpg.jpg?v=4" alt="" onerror="this.src='images/${filename}.jpg.jpeg?v=4';this.onerror=function(){this.src='images/${filename}.jpg.png?v=4';this.onerror=function(){this.src='images/${filename}.jpg?v=4';this.onerror=function(){this.style.display='none';}}}">`;
 }
 
 function isDiscountValid() {
@@ -934,7 +934,7 @@ function renderJacSeries() {
       ${BLANC_SERIES.map((s, i) => {
         const sel = state.jac.seriesIdx === i ? 'selected' : '';
         return `<div class="card-series-overlay ${sel}" data-idx="${i}">
-          <img class="card-series-overlay-img" src="images/blanc_${s.id}.jpg.jpg?v=3" alt="" onerror="this.src='images/blanc_${s.id}.jpg.jpeg?v=3';this.onerror=function(){this.src='images/blanc_${s.id}.jpg.png?v=3';this.onerror=function(){this.src='images/blanc_${s.id}.jpg?v=3';this.onerror=function(){this.style.display='none';}};}">
+          <img class="card-series-overlay-img" src="images/blanc_${s.id}.jpg.jpg?v=4" alt="" onerror="this.src='images/blanc_${s.id}.jpg.jpeg?v=4';this.onerror=function(){this.src='images/blanc_${s.id}.jpg.png?v=4';this.onerror=function(){this.src='images/blanc_${s.id}.jpg?v=4';this.onerror=function(){this.style.display='none';}};}">
           <div class="card-series-overlay-body">
             <div class="card-series-overlay-name">${s.name}</div>
             <div class="card-series-overlay-sub">${s.nameJa}</div>
@@ -1834,7 +1834,7 @@ function render() {
     <div class="header">
       <a href="../" style="text-decoration:none;color:#888;font-size:11px;letter-spacing:0.06em;display:flex;align-items:center;gap:4px;padding:4px 8px;border:1px solid #E2E2E2;border-radius:3px;background:#fff;">← ホーム</a>
       <div class="header-logo">簡易見積もりシステム</div>
-      <a href="../" style="display:block;line-height:0;"><img class="header-logo-img" src="images/sense_logo.jpg.png.png?v=3" alt="SENSE Product Company — ホームへ" onerror="this.src='images/sense_logo.jpg.png?v=3';this.onerror=function(){this.style.display='none';}"></a>
+      <a href="../" style="display:block;line-height:0;"><img class="header-logo-img" src="images/sense_logo.jpg.png.png?v=4" alt="SENSE Product Company — ホームへ" onerror="this.src='images/sense_logo.jpg.png?v=4';this.onerror=function(){this.style.display='none';}"></a>
     </div>
     ${renderFromHearingBanner()}
     ${progressBar}
