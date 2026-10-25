@@ -173,6 +173,12 @@ const SAU_MATERIALS = [
   { id: 'redcedar', name: 'レッドシダー', pricePerSqm: 95000, benchPpm: 50000, backrestPpm: 31000 },
 ];
 
+const SAU_POWER_BOXES = [
+  { name: '電源ボックス 6KW', price: 200000 },
+  { name: '電源ボックス 8KW', price: 220000 },
+  { name: '電源ボックス 9KW', price: 230000 },
+];
+
 const SAU_STOVES = [
   { name: 'HARVIAストーブ 6KW',  price: 200000 },
   { name: 'HARVIAストーブ 8KW',  price: 220000 },
@@ -303,6 +309,7 @@ const state = {
     benchType: null, benchLength: '', hinokiLength: '', backrestLength: '',
     roofEnabled: false,
     stoveIdx: null,
+    powerBoxIdx: null,
     funcOptions: FUNC_OPTIONS.map(() => false),
     accessories: SAU_ACCESSORIES.map(() => false),
   },
@@ -340,6 +347,7 @@ const SAU_STEPS = [
   { id: 'sau_backrest', title: '背もたれ' },
   { id: 'sau_roof',     title: '屋外防水屋根' },
   { id: 'sau_stove',    title: 'ストーブ選択' },
+  { id: 'sau_power',    title: '電源ボックス' },
   { id: 'sau_func',     title: '機能オプション' },
   { id: 'sau_acc',      title: 'オプションパーツ' },
   { id: 'discount',     title: '値引き' },
@@ -571,11 +579,12 @@ function calcSaunaBreakdown() {
   const roofPrice = roofArea * ROOF_PPM;
 
   const stovePrice = sau.stoveIdx !== null ? SAU_STOVES[sau.stoveIdx].price : 0;
+  const powerBoxPrice = sau.powerBoxIdx !== null ? SAU_POWER_BOXES[sau.powerBoxIdx].price : 0;
   const funcTotal  = sau.funcOptions.reduce((s, on, i) => on ? s + FUNC_OPTIONS[i].price   : s, 0);
   const accTotal   = sau.accessories.reduce((s, on, i) => on ? s + SAU_ACCESSORIES[i].price : s, 0);
 
   const total = woodPrice + fixGlassPrice + doorPrice + tileDetails.reduce((s, t) => s + t.price, 0) +
-                benchPrice + backrestPrice + hinokiPrice + roofPrice + stovePrice + funcTotal + accTotal;
+                benchPrice + backrestPrice + hinokiPrice + roofPrice + stovePrice + powerBoxPrice + funcTotal + accTotal;
 
   return {
     mat, dims, woodArea, woodPrice,
@@ -584,7 +593,7 @@ function calcSaunaBreakdown() {
     benchLen, benchPrice, backrestLen, backrestPrice,
     hinokiLen, hinokiPrice,
     roofArea, roofPrice,
-    stovePrice, funcTotal, accTotal, total,
+    stovePrice, powerBoxPrice, funcTotal, accTotal, total,
   };
 }
 
@@ -761,6 +770,7 @@ function saveCurrentEstimate() {
     if (benchRows.length) s.push(`<div class="estimate-section-title">ベンチ・背もたれ</div>` + benchRows.join(''));
     if (bd.roofArea > 0) s.push(`<div class="estimate-section-title">屋外防水屋根</div><div class="estimate-row"><div class="estimate-row-label">屋外用防水屋根<span class="estimate-row-detail">${round2(bd.roofArea).toFixed(2)} ㎡</span></div><div class="estimate-row-price">${fmt(bd.roofPrice)}</div></div>`);
     if (bd.stovePrice > 0) s.push(`<div class="estimate-section-title">ストーブ</div><div class="estimate-row"><div class="estimate-row-label">${SAU_STOVES[state.sau.stoveIdx].name}</div><div class="estimate-row-price">${fmt(bd.stovePrice)}</div></div>`);
+    if (bd.powerBoxPrice > 0) s.push(`<div class="estimate-section-title">電源ボックス</div><div class="estimate-row"><div class="estimate-row-label">${SAU_POWER_BOXES[state.sau.powerBoxIdx].name}</div><div class="estimate-row-price">${fmt(bd.powerBoxPrice)}</div></div>`);
     const funcRows = FUNC_OPTIONS.filter((_, i) => state.sau.funcOptions[i]).map(f => `<div class="estimate-row"><div class="estimate-row-label">${f.name}</div><div class="estimate-row-price">${fmt(f.price)}</div></div>`);
     if (funcRows.length) s.push(`<div class="estimate-section-title">機能オプション</div>` + funcRows.join(''));
     const accRows = SAU_ACCESSORIES.filter((_, i) => state.sau.accessories[i]).map(a => `<div class="estimate-row"><div class="estimate-row-label">${a.name}</div><div class="estimate-row-price">${fmt(a.price)}</div></div>`);
@@ -1311,6 +1321,20 @@ function renderSauStove() {
       </div>`).join('')}`;
 }
 
+function renderSauPowerBox() {
+  return `
+    <div class="step-title">電源ボックスを選択</div>
+    <div class="step-sub">ストーブに対応する電源ボックスをお選びください（任意）</div>
+    ${renderNavBar('← 戻る', '次へ →', false)}
+    <div class="stove-option stove-option-none ${state.sau.powerBoxIdx===null?'selected':''}" data-power="none">
+      <div class="stove-name">選択しない</div><div class="stove-price">—</div>
+    </div>
+    ${SAU_POWER_BOXES.map((p, i) => `
+      <div class="stove-option ${state.sau.powerBoxIdx===i?'selected':''}" data-power="${i}">
+        <div class="stove-name">${p.name}</div><div class="stove-price">${fmt(p.price)}</div>
+      </div>`).join('')}`;
+}
+
 function renderSauFuncOptions() {
   return `
     <div class="step-title">機能オプション</div>
@@ -1633,6 +1657,9 @@ function renderEstimateSauna() {
   if (bd.stovePrice > 0) sections.push(`<div class="estimate-section-title">ストーブ</div>
     <div class="estimate-row"><div class="estimate-row-label">${SAU_STOVES[state.sau.stoveIdx].name}</div><div class="estimate-row-price">${fmt(bd.stovePrice)}</div></div>`);
 
+  if (bd.powerBoxPrice > 0) sections.push(`<div class="estimate-section-title">電源ボックス</div>
+    <div class="estimate-row"><div class="estimate-row-label">${SAU_POWER_BOXES[state.sau.powerBoxIdx].name}</div><div class="estimate-row-price">${fmt(bd.powerBoxPrice)}</div></div>`);
+
   const funcRows = FUNC_OPTIONS.filter((_, i) => state.sau.funcOptions[i]).map(f =>
     `<div class="estimate-row"><div class="estimate-row-label">${f.name}</div><div class="estimate-row-price">${fmt(f.price)}</div></div>`);
   if (funcRows.length) sections.push(`<div class="estimate-section-title">機能オプション</div>` + funcRows.join(''));
@@ -1779,6 +1806,7 @@ function render() {
     case 'sau_backrest': content = renderSauBackrest();      break;
     case 'sau_roof':     content = renderSauRoof();          break;
     case 'sau_stove':    content = renderSauStove();         break;
+    case 'sau_power':    content = renderSauPowerBox();      break;
     case 'sau_func':     content = renderSauFuncOptions();   break;
     case 'sau_acc':      content = renderSauAccessories();   break;
     case 'logs_size':     content = renderLogsSize();         break;
@@ -1879,7 +1907,7 @@ function attachEvents() {
       frontGlass: { fix: false, door: false }, sideGlass: { fix: false, door: false },
       tileFront: false, tileBack: false, tileSideA: false, tileSideB: false,
       benchType: null, benchLength: '', hinokiLength: '', backrestLength: '',
-      roofEnabled: false, stoveIdx: null,
+      roofEnabled: false, stoveIdx: null, powerBoxIdx: null,
       funcOptions: FUNC_OPTIONS.map(() => false),
       accessories: SAU_ACCESSORIES.map(() => false),
     };
@@ -2096,6 +2124,13 @@ function attachEvents() {
     }));
   }
 
+  if (stepId === 'sau_power') {
+    document.querySelectorAll('[data-power]').forEach(el => el.addEventListener('click', () => {
+      state.sau.powerBoxIdx = el.dataset.power === 'none' ? null : parseInt(el.dataset.power);
+      advanceAfterSelect(el);
+    }));
+  }
+
   if (stepId === 'sau_func') {
     document.querySelectorAll('[data-func]').forEach(el => el.addEventListener('click', () => {
       const i = parseInt(el.dataset.func);
@@ -2261,7 +2296,7 @@ function resetState() {
     frontGlass: { fix: false, door: false }, sideGlass: { fix: false, door: false },
     tileFront: false, tileBack: false, tileSideA: false, tileSideB: false,
     benchType: null, benchLength: '', hinokiLength: '', backrestLength: '',
-    roofEnabled: false, stoveIdx: null,
+    roofEnabled: false, stoveIdx: null, powerBoxIdx: null,
     funcOptions: FUNC_OPTIONS.map(() => false),
     accessories: SAU_ACCESSORIES.map(() => false),
   };
